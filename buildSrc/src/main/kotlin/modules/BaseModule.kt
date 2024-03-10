@@ -1,8 +1,9 @@
-package module
+package modules
 
 import org.gradle.api.JavaVersion
 
-abstract class BaseModuleConfig {
+abstract class BaseModule {
+    abstract val name: String
     abstract val namespace: String
     abstract val versionCode: Int
     abstract val versionName: String
