@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Home plant autowatering</string>
+    <string name="signing_in">Выполняется вход…</string>
 </resources>

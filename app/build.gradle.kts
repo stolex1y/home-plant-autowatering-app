@@ -1,14 +1,19 @@
-import module.AppModuleConfig
+import AppDependencies.moduleImplementation
+import modules.AppModule
+import modules.CommonModule
+import modules.UiCommonModule
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.gms)
+    alias(libs.plugins.hilt)
 }
 
 android {
-    val moduleConfig = AppModuleConfig
+    val moduleConfig = AppModule
     namespace = moduleConfig.namespace
     compileSdk = moduleConfig.compileSdk
 
@@ -25,6 +30,7 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
+            buildConfigField("int", "LOG_LEVEL", LogLevel.VERBOSE.intVal.toString())
         }
         release {
             isMinifyEnabled = false
@@ -32,11 +38,19 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("int", "LOG_LEVEL", LogLevel.WARN.intVal.toString())
+        }
+        all {
+            moduleConfig.properties.forEach {
+                println("Add prop: $it")
+                buildConfigField("String", it.key, "\"${it.value}\"")
+            }
         }
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {
@@ -54,6 +68,8 @@ android {
 }
 
 dependencies {
+    moduleImplementation(UiCommonModule)
+    moduleImplementation(CommonModule)
 
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
@@ -79,10 +95,7 @@ dependencies {
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.ui.tooling.preview)
 
-    debugImplementation(libs.androidx.compose.ui.tooling)
-
     implementation(libs.androidx.lifecycle.viewmodel.savedstate)
-
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
@@ -93,6 +106,7 @@ dependencies {
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.preference)
     implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.core.ktx)
@@ -108,14 +122,25 @@ dependencies {
     implementation(libs.hilt.navigation)
     implementation(libs.hilt.workmanager)
 
+    val firebaseBom = platform(libs.firebase.bom)
+    implementation(firebaseBom)
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.ui.auth)
+    implementation(libs.firebase.auth)
+
+    implementation(libs.gson)
+
+    implementation(libs.google.play.auth)
+
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+
     kaptTest(libs.hilt.compiler)
 
     kaptAndroidTest(libs.hilt.android.testing)
 
     testImplementation(libs.junit)
     testImplementation(libs.androidx.room.testing)
-
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.core)

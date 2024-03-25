@@ -4,8 +4,10 @@ coreKtx = "1.12.0"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 appcompat = "1.6.1"
-accompanist = "0.30.1"
+accompanist = "0.32.0"
 androidx-annotation = "1.7.1"
+androidx-activity = "1.8.2"
+androidx-activity-ktx = "1.8.2"
 androidx-activity-compose = "1.8.2"
 androidx-appcompat = "1.6.1"
 androidx-benchmark = "1.2.3"
@@ -30,26 +32,26 @@ androidx-test-ext-junit = "1.1.5"
 androidx-test-ext-truth = "1.5.0"
 androidx-window = "1.2.0"
 androidx-work = "2.9.0"
-androidxHiltNavigationCompose = "1.2.0"
+androidx-hilt-navigation-compose = "1.2.0"
 androix-test-uiautomator = "2.3.0"
-coil = "2.4.0"
+coil = "2.5.0"
 compose-compiler = "1.4.0"
 coroutines = "1.7.3"
 google-maps = "18.2.0"
 gradle-versions = "0.47.0"
-hilt = "2.47"
+hilt = "2.51"
 hiltExt = "1.2.0"
 hilt-workmanager = "1.2.0"
 hilt-navigation = "1.2.0"
-jdkDesugar = "2.0.4"
+jdk-desugar = "2.0.4"
 junit = "4.13.2"
 kotlin = "1.9.22"
-kotlinx_immutable = "0.3.5"
-ksp = "1.9.0-1.0.12"
+kotlinx-immutable = "0.3.5"
+ksp = "1.9.22-1.0.18"
 maps-compose = "2.5.3"
 material = "1.11.0"
-okhttp = "4.11.0"
-robolectric = "4.9.2"
+okhttp = "4.12.0"
+robolectric = "4.11.1"
 rome = "1.18.0"
 room = "2.6.1"
 secrets = "2.0.1"
@@ -60,10 +62,32 @@ retrofit = "2.9.0"
 gson = "2.10.1"
 timber = "5.0.1"
 gms = "4.4.1"
-dagger = "2.47"
+dagger = "2.51"
 compose-ui = "1.6.3"
+firebase-crashlytics-plugin = "2.9.9"
+firebase-perf-plugin = "1.4.2"
+android-gradle-plugin = "8.3.0"
+android-tools = "31.3.0"
+truth = "1.4.2"
+navigation-common-ktx = "2.7.7"
+firebase-bom = "32.7.4"
+firebase-ui-auth = "7.2.0"
+datastore-preferences = "1.0.0"
+datastore-proto = "1.0.0"
+google-play-auth = "21.0.0"
 
 [libraries]
+
+# Dependencies of the included build-logic
+android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradle-plugin" }
+android-tools-common = { group = "com.android.tools", name = "common", version.ref = "android-tools" }
+firebase-crashlytics-gradlePlugin = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-plugin" }
+firebase-performance-gradlePlugin = { group = "com.google.firebase", name = "perf-plugin", version.ref = "firebase-perf-plugin" }
+kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
+truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -76,7 +100,8 @@ accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiper
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity-compose" }
-androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activity-compose" }
+androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activity-ktx" }
+androidx-activity = { module = "androidx.activity:activity", version.ref = "androidx-activity" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
 androidx-benchmark-macrobenchmark = { module = "androidx.benchmark:benchmark-macro", version.ref = "androidx-benchmark" }
 androidx-benchmark-macrobenchmark-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "androidx-benchmark-junit4" }
@@ -106,7 +131,7 @@ androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref
 androidx-glance = { module = "androidx.glance:glance", version.ref = "androidx-glance" }
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "androidx-glance" }
 androidx-glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "androidx-glance" }
-androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "androidxHiltNavigationCompose" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "androidx-hilt-navigation-compose" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
@@ -136,7 +161,7 @@ androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "
 
 androidx-window = { module = "androidx.window:window", version.ref = "androidx-window" }
 coil-kt-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
-core-jdk-desugaring = { module = "com.android.tools:desugar_jdk_libs", version.ref = "jdkDesugar" }
+core-jdk-desugaring = { module = "com.android.tools:desugar_jdk_libs", version.ref = "jdk-desugar" }
 google-android-material = { module = "com.google.android.material:material", version.ref = "material" }
 googlemaps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps-compose" }
 googlemaps-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "google-maps" }
@@ -147,7 +172,7 @@ hilt-ext-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hil
 hilt-workmanager = { module = "androidx.hilt:hilt-work", version.ref = "hilt-workmanager" }
 hilt-navigation = { module = "androidx.hilt:hilt-work", version.ref = "hilt-navigation" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
-kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx_immutable" }
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-immutable" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 okhttp-logging = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
@@ -161,6 +186,14 @@ retrofit-converter = { module = "com.squareup.retrofit2:converter-gson", version
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 dagger = { module = "com.google.dagger:dagger", version.ref = "dagger" }
+androidx-navigation-common-ktx = { group = "androidx.navigation", name = "navigation-common-ktx", version.ref = "navigation-common-ktx" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-ui-auth = { group = "com.firebaseui", name = "firebase-ui-auth", version.ref= "firebase-ui-auth" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore-preferences" }
+androidx-datastore-proto = { group = "androidx.datastore", name = "datastore", version.ref = "datastore-proto" }
+google-play-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "google-play-auth" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
