@@ -3,6 +3,9 @@ package ru.filimonov.hpa.common.coroutine
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 
@@ -37,6 +40,89 @@ object FlowExtensions {
                 Result.failure(ifNullValue)
             else
                 Result.success(it.getOrNull()!!)
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T1, T2, R> combineResultsTransform(
+        flow: Flow<Result<T1>>,
+        flow2: Flow<Result<T2>>,
+        transform: suspend (T1, T2) -> R
+    ): Flow<Result<R>> {
+        return combineResults(flow, flow2).mapLatestResult { transform(it[0] as T1, it[1] as T2) }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T1, T2, T3, R> combineResultsTransform(
+        flow: Flow<Result<T1>>,
+        flow2: Flow<Result<T2>>,
+        flow3: Flow<Result<T3>>,
+        transform: suspend (T1, T2, T3) -> R
+    ): Flow<Result<R>> {
+        return combineResults(flow, flow2, flow3).mapLatestResult {
+            transform(
+                it[0] as T1,
+                it[1] as T2,
+                it[2] as T3,
+            )
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T1, T2, T3, T4, R> combineResultsTransform(
+        flow: Flow<Result<T1>>,
+        flow2: Flow<Result<T2>>,
+        flow3: Flow<Result<T3>>,
+        flow4: Flow<Result<T4>>,
+        transform: suspend (T1, T2, T3, T4) -> R
+    ): Flow<Result<R>> {
+        return combineResults(flow, flow2, flow3, flow4).mapLatestResult {
+            transform(
+                it[0] as T1,
+                it[1] as T2,
+                it[2] as T3,
+                it[3] as T4,
+            )
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T1, T2, T3, T4, T5, R> combineResultsTransform(
+        flow: Flow<Result<T1>>,
+        flow2: Flow<Result<T2>>,
+        flow3: Flow<Result<T3>>,
+        flow4: Flow<Result<T4>>,
+        flow5: Flow<Result<T5>>,
+        transform: suspend (T1, T2, T3, T4, T5) -> R
+    ): Flow<Result<R>> {
+        return combineResults(flow, flow2, flow3, flow4, flow5).mapLatestResult {
+            transform(
+                it[0] as T1,
+                it[1] as T2,
+                it[2] as T3,
+                it[3] as T4,
+                it[4] as T5,
+            )
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun <T, R> Flow<Result<T>>.flatMapLatestResult(transform: suspend (value: T) -> Flow<Result<R>>): Flow<Result<R>> =
+        flatMapLatest {
+            if (it.isFailure)
+                flow { Result.failure<R>(it.exceptionOrNull()!!) }
+            else
+                transform(it.getOrNull()!!)
+        }
+
+    private fun combineResults(vararg flows: Flow<Result<*>>): Flow<Result<Array<*>>> {
+        return combine<Result<*>, Result<Array<*>>>(*flows) { flowArray: Array<Result<*>> ->
+            val firstFailure = flowArray.firstOrNull { it.isFailure }
+            if (firstFailure != null) {
+                Result.failure(firstFailure.exceptionOrNull()!!)
+            } else {
+                Result.success(flowArray.map { it.getOrThrow()!! }.toTypedArray())
+            }
         }
     }
 }

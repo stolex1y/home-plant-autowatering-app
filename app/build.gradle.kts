@@ -132,6 +132,9 @@ dependencies {
 
     implementation(libs.google.play.auth)
 
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

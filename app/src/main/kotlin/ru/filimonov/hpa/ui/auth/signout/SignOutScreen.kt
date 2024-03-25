@@ -8,9 +8,9 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import ru.filimonov.hpa.BuildConfig
 import ru.filimonov.hpa.ui.auth.AuthViewModel
 import ru.filimonov.hpa.ui.common.navigation.Destination
-import ru.filimonov.hpa.ui.devices.DevicesScreenDestination
 
 @Composable
 fun SignOutScreen(
@@ -21,8 +21,7 @@ fun SignOutScreen(
     val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestProfile()
         .requestEmail()
-//            .requestIdToken(BuildConfig.FIREBASE_AUTH_CLIENT_ID)
-        .requestIdToken("958297732854-78en75e5o6s6svqeoj7cormo804kbomc.apps.googleusercontent.com")
+        .requestIdToken(BuildConfig.FIREBASE_AUTH_CLIENT_ID)
         .build()
     val googleSignInClient = GoogleSignIn.getClient(context, signInOptions)
     googleSignInClient.signOut()

@@ -1,4 +1,4 @@
-package ru.filimonov.hpa.domain.auth
+package ru.filimonov.hpa.domain.model
 
 data class UserAccount(
     val name: String? = null,

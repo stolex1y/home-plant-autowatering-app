@@ -4,10 +4,10 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ru.filimonov.hpa.data.auth.GoogleAuthTokenServiceImpl
-import ru.filimonov.hpa.data.auth.UserAuthServiceImpl
-import ru.filimonov.hpa.domain.auth.GoogleAuthTokenService
-import ru.filimonov.hpa.domain.auth.UserAuthService
+import ru.filimonov.hpa.data.service.auth.GoogleAuthTokenServiceImpl
+import ru.filimonov.hpa.data.service.auth.UserAuthServiceImpl
+import ru.filimonov.hpa.domain.service.auth.GoogleAuthTokenService
+import ru.filimonov.hpa.domain.service.auth.UserAuthService
 
 @Module
 @InstallIn(SingletonComponent::class)

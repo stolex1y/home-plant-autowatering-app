@@ -1,4 +1,4 @@
-package ru.filimonov.hpa.domain.auth
+package ru.filimonov.hpa.domain.service.auth
 
 import kotlinx.coroutines.flow.Flow
 
@@ -9,4 +9,5 @@ interface GoogleAuthTokenService {
     fun getRefreshToken(): Flow<String?>
     suspend fun setRefreshToken(refreshToken: String?): Result<Unit>
     suspend fun resetRefreshToken(): Result<Unit>
+    suspend fun resetAll(): Result<Unit>
 }

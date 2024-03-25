@@ -1,6 +1,7 @@
-package ru.filimonov.hpa.domain.auth
+package ru.filimonov.hpa.domain.service.auth
 
 import kotlinx.coroutines.flow.Flow
+import ru.filimonov.hpa.domain.model.UserAccount
 
 interface UserAuthService {
     /**
@@ -26,5 +27,7 @@ interface UserAuthService {
     /**
      * Get auth token.
      */
-    fun getTokenId(): Flow<String?>
+    fun getIdToken(): Flow<String?>
+
+    suspend fun authenticate(idToken: String): Result<Unit>
 }

@@ -8,7 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import dagger.hilt.android.AndroidEntryPoint
-import ru.filimonov.hpa.domain.auth.GoogleAuthTokenService
+import ru.filimonov.hpa.domain.service.auth.UserAuthService
 import ru.filimonov.hpa.ui.auth.signin.SignInScreen
 import ru.filimonov.hpa.ui.auth.signout.addSignOutScreen
 import ru.filimonov.hpa.ui.device.adding.addDeviceAddingScreen
@@ -26,12 +26,12 @@ import javax.inject.Inject
 internal class MainActivity : AppCompatActivity() {
 
     @Inject
-    lateinit var googleAuthTokenService: GoogleAuthTokenService
+    lateinit var userAuthService: UserAuthService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val authState by googleAuthTokenService.getIdToken().collectAsState(initial = null)
+            val authState by userAuthService.getIdToken().collectAsState(initial = null)
             HpaTheme {
                 val hpaNavController = rememberHpaNavController()
                 if (authState == null) {
@@ -55,7 +55,10 @@ private fun NavGraphBuilder.navGraph(
     navController: HpaNavController
 ) {
     addSignOutScreen(onSignOut = { navController.navigateToRoute(navController.startDestination()!!) })
-    addDevicesScreen(onSignOut = navController::signOut, onNavigateUp = navController::navigateUp)
+    addDevicesScreen(
+        onNavigateToDestination = navController::navigateTo,
+        onNavigateUp = navController::navigateUp
+    )
 
     addDeviceAddingScreen(onNavigateUp = navController::navigateUp)
     addDeviceConfiguringScreen(onNavigateUp = navController::navigateUp)

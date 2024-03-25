@@ -1,4 +1,4 @@
-package ru.filimonov.hpa.data.auth
+package ru.filimonov.hpa.data.service.auth
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -6,9 +6,11 @@ import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
-import ru.filimonov.hpa.domain.auth.GoogleAuthTokenService
-import ru.filimonov.hpa.domain.auth.UserAccount
-import ru.filimonov.hpa.domain.auth.UserAuthService
+import ru.filimonov.hpa.data.remote.model.ReauthRequest
+import ru.filimonov.hpa.data.remote.repository.AuthRemoteRepository
+import ru.filimonov.hpa.domain.model.UserAccount
+import ru.filimonov.hpa.domain.service.auth.GoogleAuthTokenService
+import ru.filimonov.hpa.domain.service.auth.UserAuthService
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,7 +18,7 @@ import javax.inject.Singleton
 @Singleton
 internal class UserAuthServiceImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val firebaseTokenRepository: FirebaseTokenRepository,
+    private val authRemoteRepository: AuthRemoteRepository,
     private val googleAuthTokenService: GoogleAuthTokenService,
 ) : UserAuthService {
 
@@ -42,7 +44,7 @@ internal class UserAuthServiceImpl @Inject constructor(
         Timber.d("try reauthenticate")
         val refreshToken = googleAuthTokenService.getRefreshToken().first() ?: return false
         try {
-            val idToken = firebaseTokenRepository.getIdToken(refreshToken).getOrThrow()
+            val idToken = authRemoteRepository.reauth(ReauthRequest(refreshToken)).idToken
             firebaseAuth.signInWithCredential(
                 GoogleAuthProvider.getCredential(
                     idToken, null
@@ -52,8 +54,7 @@ internal class UserAuthServiceImpl @Inject constructor(
             Timber.d("success reauthenticate")
             return true
         } catch (ex: Throwable) {
-            googleAuthTokenService.resetIdToken()
-            googleAuthTokenService.resetRefreshToken()
+            googleAuthTokenService.resetAll()
             Timber.d("fail reauthenticate: ${ex.localizedMessage}")
         }
         return false
@@ -61,12 +62,22 @@ internal class UserAuthServiceImpl @Inject constructor(
 
     override suspend fun cleanSession() {
         firebaseAuth.signOut()
-        googleAuthTokenService.resetRefreshToken()
-        googleAuthTokenService.resetIdToken()
+        googleAuthTokenService.resetAll()
     }
 
-    override fun getTokenId(): Flow<String?> {
+    override fun getIdToken(): Flow<String?> {
         return googleAuthTokenService.getIdToken()
+    }
+
+    override suspend fun authenticate(idToken: String): Result<Unit> {
+        return runCatching {
+            firebaseAuth.signInWithCredential(
+                GoogleAuthProvider.getCredential(idToken, null)
+            ).await()
+            val refreshToken = authRemoteRepository.auth().refreshToken
+            googleAuthTokenService.setIdToken(idToken = idToken)
+            googleAuthTokenService.setRefreshToken(refreshToken = refreshToken)
+        }
     }
 
     /**

@@ -1,4 +1,4 @@
-package ru.filimonov.hpa.data.auth
+package ru.filimonov.hpa.data.service.auth
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -14,8 +14,10 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import ru.filimonov.hpa.common.coroutine.CoroutineNames
+import ru.filimonov.hpa.common.coroutine.FlowExtensions
+import ru.filimonov.hpa.common.utils.combineResults
 import ru.filimonov.hpa.data.di.DataStoreModule
-import ru.filimonov.hpa.domain.auth.GoogleAuthTokenService
+import ru.filimonov.hpa.domain.service.auth.GoogleAuthTokenService
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
@@ -71,6 +73,10 @@ class GoogleAuthTokenServiceImpl @Inject constructor(
             .flowOn(dispatcher)
             .onStart { Timber.d("get refresh token flow") }
             .onEach { Timber.d("get new refresh token from flow") }
+    }
+
+    override suspend fun resetAll(): Result<Unit> {
+        return combineResults(resetIdToken(), resetRefreshToken())
     }
 
     override suspend fun setRefreshToken(refreshToken: String?): Result<Unit> {
