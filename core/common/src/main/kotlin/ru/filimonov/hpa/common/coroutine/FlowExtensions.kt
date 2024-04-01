@@ -1,13 +1,21 @@
 package ru.filimonov.hpa.common.coroutine
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+
+private val DEFAULT_SYNC_DELAY = 10.seconds
+private val DEFAULT_RETRY_DELAY = 10.seconds
+private val MAX_RETRY_DELAY = 100.seconds
 
 object FlowExtensions {
     fun <T> Flow<T>.mapToResult() =
@@ -114,6 +122,36 @@ object FlowExtensions {
             else
                 transform(it.getOrNull()!!)
         }
+
+    suspend fun <T> FlowCollector<Result<T>>.emitResult(
+        retryDelay: Duration = DEFAULT_RETRY_DELAY,
+        action: suspend () -> T
+    ) {
+        runCatching {
+            action()
+        }.onFailure {
+            emit(Result.failure(it))
+            if (retryDelay < MAX_RETRY_DELAY) {
+                delay(retryDelay)
+                emitResult(retryDelay * 2, action)
+            }
+        }.onSuccess {
+            emit(Result.success(it))
+        }
+    }
+
+    fun <T> makeSyncFlow(
+        syncDelay: Duration = DEFAULT_SYNC_DELAY,
+        retryDelay: Duration = DEFAULT_RETRY_DELAY,
+        emitter: suspend () -> T,
+    ): Flow<Result<T>> {
+        return flow {
+            while (true) {
+                emitResult(retryDelay = retryDelay, emitter)
+                delay(syncDelay)
+            }
+        }
+    }
 
     private fun combineResults(vararg flows: Flow<Result<*>>): Flow<Result<Array<*>>> {
         return combine<Result<*>, Result<Array<*>>>(*flows) { flowArray: Array<Result<*>> ->
