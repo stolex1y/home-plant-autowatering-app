@@ -1,4 +1,4 @@
-package ru.filimonov.hpa.data.remote.model
+package ru.filimonov.hpa.data.remote.model.device
 
 import ru.filimonov.hpa.domain.model.Device
 import java.util.UUID
