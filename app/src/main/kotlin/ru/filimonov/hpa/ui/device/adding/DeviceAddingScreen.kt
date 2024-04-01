@@ -5,22 +5,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import ru.filimonov.hpa.ui.common.navigation.Destination
+import java.util.UUID
 
 @Composable
 fun DeviceAddingScreen(
-
+    onAdding: (UUID) -> Unit,
+    onCancel: () -> Unit,
 ) {
 }
 
 
 fun NavGraphBuilder.addDeviceAddingScreen(
-    onNavigateUp: () -> Unit,
+    onAdding: (UUID) -> Unit,
+    onCancel: () -> Unit,
 ) {
     composable(
         route = DeviceAddingScreenDestination.path.raw,
     ) {
         DeviceAddingScreen(
-
+            onAdding = onAdding,
+            onCancel = onCancel,
         )
     }
 }
