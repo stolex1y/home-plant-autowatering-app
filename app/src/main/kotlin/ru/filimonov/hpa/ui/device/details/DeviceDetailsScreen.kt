@@ -6,10 +6,11 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import ru.filimonov.hpa.ui.common.navigation.Destination
 import ru.filimonov.hpa.ui.theme.HpaTheme
+import java.util.UUID
 
 @Composable
 fun DeviceDetailsScreen(
-    deviceId: String
+    deviceId: UUID
 ) {
 }
 
@@ -18,16 +19,15 @@ fun DeviceDetailsContent() {
 
 }
 
-fun NavGraphBuilder.addDeviceDetailsScreen(
-    onNavigateUp: () -> Unit,
-) {
-    val destination = DeviceDetailsScreenDestination("")
+fun NavGraphBuilder.addDeviceDetailsScreen() {
+    val destinationSample = DeviceDetailsScreenDestination(UUID.randomUUID())
     composable(
-        route = destination.path.raw,
-        arguments = listOf(destination.deviceIdArg.toNavArgument())
+        route = destinationSample.path.raw,
+        arguments = listOf(destinationSample.deviceIdArg.toNavArgument())
     ) { navBackStackEntry ->
         val deviceId =
             navBackStackEntry.arguments?.getString(DeviceDetailsScreenDestination.ARG_DEVICE_ID)!!
+                .run(UUID::fromString)
         DeviceDetailsScreen(
             deviceId = deviceId
         )
@@ -35,9 +35,9 @@ fun NavGraphBuilder.addDeviceDetailsScreen(
 }
 
 class DeviceDetailsScreenDestination(
-    deviceId: String
+    deviceId: UUID
 ) : Destination {
-    internal val deviceIdArg = Destination.Arg(ARG_DEVICE_ID, deviceId)
+    internal val deviceIdArg = Destination.Arg(ARG_DEVICE_ID, deviceId.toString())
 
     override val path: Destination.Path =
         Destination.Path() /

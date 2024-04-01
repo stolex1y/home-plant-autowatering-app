@@ -11,8 +11,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import ru.filimonov.hpa.domain.service.auth.UserAuthService
 import ru.filimonov.hpa.ui.auth.signin.SignInScreen
 import ru.filimonov.hpa.ui.auth.signout.addSignOutScreen
+import ru.filimonov.hpa.ui.device.adding.DeviceAddingScreenDestination
 import ru.filimonov.hpa.ui.device.adding.addDeviceAddingScreen
 import ru.filimonov.hpa.ui.device.configuring.addDeviceConfiguringScreen
+import ru.filimonov.hpa.ui.device.details.DeviceDetailsScreenDestination
 import ru.filimonov.hpa.ui.device.details.addDeviceDetailsScreen
 import ru.filimonov.hpa.ui.device.sensors.addSoilMoistureChartScreen
 import ru.filimonov.hpa.ui.devices.DevicesScreenDestination
@@ -57,12 +59,14 @@ private fun NavGraphBuilder.navGraph(
     addSignOutScreen(onSignOut = { navController.navigateToRoute(navController.startDestination()!!) })
     addDevicesScreen(
         onNavigateToDestination = navController::navigateTo,
-        onNavigateUp = navController::navigateUp
+        onAddDevice = { navController.navigateTo(DeviceAddingScreenDestination) }
     )
-
-    addDeviceAddingScreen(onNavigateUp = navController::navigateUp)
+    addDeviceAddingScreen(
+        onAdding = { uuid -> navController.navigateTo(DeviceDetailsScreenDestination(uuid)) },
+        onCancel = navController::navigateUp
+    )
     addDeviceConfiguringScreen(onNavigateUp = navController::navigateUp)
-    addDeviceDetailsScreen(onNavigateUp = navController::navigateUp)
+    addDeviceDetailsScreen()
 
     addSoilMoistureChartScreen(onNavigateUp = navController::navigateUp)
 }
