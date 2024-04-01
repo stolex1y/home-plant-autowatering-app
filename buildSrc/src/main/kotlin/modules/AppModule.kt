@@ -9,5 +9,6 @@ object AppModule : BaseModule() {
         "FIREBASE_AUTH_CLIENT_ID" to System.getenv("HPA_ANDROID_AUTH_CLIENT_ID"),
         "API_BASE_URL" to "http://localhost:8080",
         "API_AUTH_HEADER" to "Authorization",
+        "SYNC_DELAY_MS" to (1000L * 30L).toString()
     )
 }

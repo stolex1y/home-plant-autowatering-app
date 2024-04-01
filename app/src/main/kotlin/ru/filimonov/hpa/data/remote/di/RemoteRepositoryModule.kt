@@ -24,7 +24,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-interface RemoteRepositoryModule {
+internal interface RemoteRepositoryModule {
     companion object {
         @Provides
         @Singleton
@@ -45,7 +45,8 @@ interface RemoteRepositoryModule {
         @Provides
         @IntoSet
         @Singleton
-        private fun logInterceptor(): Interceptor {
+        @JvmSuppressWildcards
+        fun logInterceptor(): Interceptor {
             return Interceptor { chain ->
                 Timber.d("make request to ${chain.request().url()}")
                 chain.proceed(chain.request())
@@ -54,7 +55,7 @@ interface RemoteRepositoryModule {
 
         @Provides
         @Singleton
-        private fun authenticator(
+        fun authenticator(
             userAuthService: Provider<UserAuthService>
         ): Authenticator {
             return Authenticator { route: Route?, response: Response ->
@@ -71,7 +72,8 @@ interface RemoteRepositoryModule {
 
         @Provides
         @Singleton
-        private fun httpClient(
+        @JvmSuppressWildcards
+        fun httpClient(
             interceptors: Set<Interceptor>,
             authenticator: Authenticator,
         ): OkHttpClient {
@@ -86,7 +88,7 @@ interface RemoteRepositoryModule {
 
         @Provides
         @Singleton
-        private fun retrofit(
+        fun retrofit(
             httpClient: OkHttpClient
         ): Retrofit {
             return Retrofit.Builder()
