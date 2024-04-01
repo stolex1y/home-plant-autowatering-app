@@ -6,7 +6,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
-import ru.filimonov.hpa.data.remote.model.ReauthRequest
+import ru.filimonov.hpa.data.remote.model.auth.ReauthRequest
 import ru.filimonov.hpa.data.remote.repository.AuthRemoteRepository
 import ru.filimonov.hpa.domain.model.UserAccount
 import ru.filimonov.hpa.domain.service.auth.GoogleAuthTokenService
