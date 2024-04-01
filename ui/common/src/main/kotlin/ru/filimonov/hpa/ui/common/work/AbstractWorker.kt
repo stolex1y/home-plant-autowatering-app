@@ -26,7 +26,7 @@ abstract class AbstractWorker<Input : Any, Output> protected constructor(
         val inputArg: Input = inputData.deserialize(inputArgClass)!!
         Timber.d("'$workName' started with arg: ${inputData.keyValueMap}")
         var result: Result = Result.failure()
-        calculate(inputArg).onFailure {
+        action(inputArg).onFailure {
             Timber.e(it, "'$workName' finished with error")
             result = Result.failure(WorkUtils.serialize(it))
         }.onSuccess {
@@ -47,10 +47,6 @@ abstract class AbstractWorker<Input : Any, Output> protected constructor(
                 applicationContext
             )
         )
-    }
-
-    private suspend fun calculate(inputArg: Input): kotlin.Result<Output> {
-        return action(inputArg)
     }
 
     companion object {
