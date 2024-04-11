@@ -17,10 +17,12 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import ru.filimonov.hpa.BuildConfig
 import ru.filimonov.hpa.data.remote.repository.AuthRemoteRepository
+import ru.filimonov.hpa.data.remote.repository.DeviceConfigurationRemoteRepository
 import ru.filimonov.hpa.data.remote.repository.DeviceRemoteRepository
 import ru.filimonov.hpa.data.remote.repository.PlantRemoteRepository
 import ru.filimonov.hpa.domain.service.auth.UserAuthService
 import timber.log.Timber
+import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 
@@ -28,6 +30,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 internal interface RemoteRepositoryModule {
     companion object {
+        const val DEVICE_RETROFIT = "DEVICE_RETROFIT"
+
         @Provides
         @Singleton
         fun authRepository(
@@ -50,6 +54,14 @@ internal interface RemoteRepositoryModule {
             retrofit: Retrofit
         ): PlantRemoteRepository {
             return retrofit.create(PlantRemoteRepository::class.java)
+        }
+
+        @Provides
+        @Singleton
+        fun deviceConfigurationRepository(
+            @Named(DEVICE_RETROFIT) retrofit: Retrofit
+        ): DeviceConfigurationRemoteRepository {
+            return retrofit.create(DeviceConfigurationRemoteRepository::class.java)
         }
 
         @Provides
@@ -125,13 +137,27 @@ internal interface RemoteRepositoryModule {
 
         @Provides
         @Singleton
-        fun retrofit(
+        fun backend_retrofit(
             httpClient: OkHttpClient,
             gson: Gson,
         ): Retrofit {
             return Retrofit.Builder()
                 .client(httpClient)
                 .baseUrl(BuildConfig.API_BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build()
+        }
+
+        @Provides
+        @Singleton
+        @Named(DEVICE_RETROFIT)
+        fun device_retrofit(
+            httpClient: OkHttpClient,
+            gson: Gson,
+        ): Retrofit {
+            return Retrofit.Builder()
+                .client(httpClient)
+                .baseUrl(BuildConfig.DEVICE_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
         }

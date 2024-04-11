@@ -1,4 +1,4 @@
-package ru.filimonov.hpa.data.service
+package ru.filimonov.hpa.data.service.device
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +20,6 @@ import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Singleton
 
 class DeviceServiceImpl @Inject constructor(
     private val deviceRemoteRepository: DeviceRemoteRepository,

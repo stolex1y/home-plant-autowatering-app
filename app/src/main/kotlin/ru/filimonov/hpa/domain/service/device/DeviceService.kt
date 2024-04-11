@@ -10,4 +10,5 @@ interface DeviceService {
     suspend fun add(device: ExtendedDevice): Result<Device>
     suspend fun delete(uuid: UUID): Result<Unit>
     suspend fun update(device: Device): Result<Unit>
+
 }

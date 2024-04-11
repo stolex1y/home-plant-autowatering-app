@@ -4,8 +4,8 @@ import java.util.Calendar
 import java.util.UUID
 
 data class ExtendedDevice(
-    val uuid: UUID,
     val mac: String,
-    val plantId: UUID?,
-    val createdDate: Calendar,
+    val uuid: UUID = UUID.randomUUID(),
+    val plantId: UUID? = null,
+    val createdDate: Calendar = Calendar.getInstance(),
 )
