@@ -2,6 +2,7 @@ package ru.filimonov.hpa.ui.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.AuthCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -43,10 +44,13 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun onSuccessSignedIn(idToken: String) {
+    fun onSuccessSignedIn(authCredential: AuthCredential) {
         applicationScope.launch(coroutineDispatcher) {
-            userAuthService.authenticate(idToken = idToken)
-            _state.value = State.SignedIn
+            userAuthService.authenticate(authCredential = authCredential).onFailure {
+                _state.value = State.SignedOut
+            }.onSuccess {
+                _state.value = State.SignedIn
+            }
         }
     }
 

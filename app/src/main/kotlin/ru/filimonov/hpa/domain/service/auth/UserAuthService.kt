@@ -1,5 +1,6 @@
 package ru.filimonov.hpa.domain.service.auth
 
+import com.google.firebase.auth.AuthCredential
 import kotlinx.coroutines.flow.Flow
 import ru.filimonov.hpa.domain.model.UserAccount
 
@@ -29,5 +30,5 @@ interface UserAuthService {
      */
     fun getIdToken(): Flow<String?>
 
-    suspend fun authenticate(idToken: String): Result<Unit>
+    suspend fun authenticate(authCredential: AuthCredential): Result<Unit>
 }

@@ -14,21 +14,18 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import ru.filimonov.hpa.common.coroutine.CoroutineNames
-import ru.filimonov.hpa.common.coroutine.FlowExtensions
 import ru.filimonov.hpa.common.utils.combineResults
 import ru.filimonov.hpa.data.di.DataStoreModule
-import ru.filimonov.hpa.domain.service.auth.GoogleAuthTokenService
+import ru.filimonov.hpa.domain.service.auth.OAuthTokenService
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Singleton
 
-@Singleton
-class GoogleAuthTokenServiceImpl @Inject constructor(
+class OAuthTokenServiceImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     @Named(DataStoreModule.AUTH_PREFERENCES) private val dataStore: DataStore<Preferences>,
     @Named(CoroutineNames.IO_DISPATCHER) private val dispatcher: CoroutineDispatcher,
-) : GoogleAuthTokenService {
+) : OAuthTokenService {
     companion object {
         private val KEY_REFRESH_TOKEN = stringPreferencesKey("refresh_token")
         private val KEY_ID_TOKEN = stringPreferencesKey("id_token")

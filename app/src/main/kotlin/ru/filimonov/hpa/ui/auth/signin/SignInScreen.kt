@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.GoogleAuthProvider
 import ru.filimonov.hpa.BuildConfig
 import ru.filimonov.hpa.R
 import ru.filimonov.hpa.ui.auth.AuthViewModel
@@ -48,7 +49,7 @@ fun SignInScreen(
         rememberLauncherForActivityResult(contract = GoogleSignInActivityResultContract()) { authRes ->
             authRes.onSuccess {
                 Timber.d("Successful signed in")
-                viewModel.onSuccessSignedIn(it.idToken!!)
+                viewModel.onSuccessSignedIn(GoogleAuthProvider.getCredential(it.idToken, null))
             }.onFailure {
                 Timber.e(it, "Sign in error")
                 onSignInFailure()
