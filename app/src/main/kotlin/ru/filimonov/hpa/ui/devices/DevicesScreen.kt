@@ -2,12 +2,14 @@ package ru.filimonov.hpa.ui.devices
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -56,23 +58,23 @@ fun DevicesScreen(
     val state by devicesViewModel.state()
     reloadData(viewModel = devicesViewModel)
 
-    LaunchedEffect(key1 = devicesViewModel) {
-        devicesViewModel.reloadData()
-    }
     Scaffold(
-        floatingActionButton = { AddDeviceButton(onClick = onAddDevice)},
+        floatingActionButton = { AddDeviceButton(onClick = onAddDevice) },
         bottomBar = {
             HpaBottomBar(
                 onNavigateToDestination = onNavigateToDestination,
                 currentTab = DevicesScreenDestination
             )
         },
+        modifier = Modifier
+            .fillMaxSize()
+            .consumeWindowInsets(WindowInsets.navigationBars),
     ) { insetsPadding ->
         Content(
             devices = data.devices,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(insetsPadding),
+                .padding(insetsPadding)
+                .fillMaxSize(),
         )
     }
 }
@@ -104,8 +106,6 @@ private fun Content(
 ) {
     Column(
         modifier = Modifier
-            .padding(16.dp)
-            .fillMaxSize()
             .then(modifier)
     ) {
         if (devices.isEmpty()) {
@@ -121,8 +121,8 @@ private fun Content(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 columns = GridCells.Fixed(2),
                 modifier = Modifier
+                    .padding(16.dp)
                     .fillMaxWidth()
-                    .then(modifier)
             ) {
                 items(items = devices, key = DeviceCardData::uuid) {
                     if (it is DeviceWithPlantCardData) {
@@ -253,11 +253,11 @@ private fun ErrorToast(state: CurrentWeatherViewModel.State) {
 }*/
 
 @Composable
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 private fun ContentPreview() {
     HpaTheme {
         Content(
-            listOf(
+            devices = listOf(
                 DeviceWithPlantCardData(
                     deviceId = UUID.randomUUID(),
                     plantId = UUID.randomUUID(),
@@ -267,6 +267,18 @@ private fun ContentPreview() {
                     deviceId = UUID.randomUUID(),
                     plantId = UUID.randomUUID(),
                     plantName = "Хлорофитум обыкновенный 2",
+                ),
+                DeviceWithoutPlantCardData(
+                    deviceId = UUID.randomUUID(),
+                ),
+                DeviceWithoutPlantCardData(
+                    deviceId = UUID.randomUUID(),
+                ),
+                DeviceWithoutPlantCardData(
+                    deviceId = UUID.randomUUID(),
+                ),
+                DeviceWithoutPlantCardData(
+                    deviceId = UUID.randomUUID(),
                 ),
                 DeviceWithoutPlantCardData(
                     deviceId = UUID.randomUUID(),
