@@ -2,6 +2,7 @@ package ru.filimonov.hpa.ui.devices
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.work.WorkManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -20,10 +21,12 @@ import ru.filimonov.hpa.ui.common.udf.SimpleLoadingState
 import ru.filimonov.hpa.ui.devices.model.DeviceCardData
 import ru.filimonov.hpa.ui.devices.model.DeviceWithPlantCardData
 import ru.filimonov.hpa.ui.devices.model.DeviceWithoutPlantCardData
+import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 
-class DevicesViewModel(
+@HiltViewModel
+class DevicesViewModel @Inject constructor(
     private val deviceService: DeviceService,
     private val plantService: PlantService,
     @Named(DEFAULT_DISPATCHER) private val defaultDispatcher: CoroutineDispatcher,

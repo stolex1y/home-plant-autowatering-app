@@ -1,6 +1,7 @@
 package ru.filimonov.hpa.ui.device.adding
 
 import androidx.work.WorkManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -11,10 +12,12 @@ import ru.filimonov.hpa.ui.common.udf.EmptyData
 import ru.filimonov.hpa.ui.common.udf.IEvent
 import ru.filimonov.hpa.ui.common.udf.SimpleLoadingState
 import ru.filimonov.hpa.ui.device.adding.model.AddingDevice
+import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 
-class DeviceAddingViewModel(
+@HiltViewModel
+class DeviceAddingViewModel @Inject constructor(
     @Named(CoroutineNames.APPLICATION_SCOPE) applicationScope: CoroutineScope,
     workManager: Provider<WorkManager>,
 ) : AbstractViewModel<DeviceAddingViewModel.Event, EmptyData, SimpleLoadingState>(
