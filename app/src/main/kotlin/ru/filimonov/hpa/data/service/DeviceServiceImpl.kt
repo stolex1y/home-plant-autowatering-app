@@ -18,9 +18,11 @@ import ru.filimonov.hpa.domain.model.ExtendedDevice
 import ru.filimonov.hpa.domain.service.device.DeviceService
 import timber.log.Timber
 import java.util.UUID
+import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 
-class DeviceServiceImpl(
+class DeviceServiceImpl @Inject constructor(
     private val deviceRemoteRepository: DeviceRemoteRepository,
     @Named(CoroutineNames.IO_DISPATCHER) private val dispatcher: CoroutineDispatcher,
 ) : DeviceService {

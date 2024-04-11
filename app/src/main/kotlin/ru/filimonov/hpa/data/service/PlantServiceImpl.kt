@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import ru.filimonov.hpa.common.coroutine.CoroutineNames
 import ru.filimonov.hpa.common.coroutine.FlowExtensions.makeSyncFlow
-import ru.filimonov.hpa.data.remote.model.plant.GetAllPlantsInListRequest
 import ru.filimonov.hpa.data.remote.model.plant.PlantResponse
 import ru.filimonov.hpa.data.remote.model.plant.toAddPlantRequest
 import ru.filimonov.hpa.data.remote.model.plant.toUpdatePlantRequest
@@ -18,14 +17,15 @@ import ru.filimonov.hpa.domain.model.Plant
 import ru.filimonov.hpa.domain.service.device.PlantService
 import timber.log.Timber
 import java.util.UUID
+import javax.inject.Inject
 import javax.inject.Named
 
-class PlantServiceImpl(
+class PlantServiceImpl @Inject constructor(
     private val plantRemoteRepository: PlantRemoteRepository,
     @Named(CoroutineNames.IO_DISPATCHER) private val dispatcher: CoroutineDispatcher,
 ) : PlantService {
     override fun getAllInList(ids: List<UUID>): Flow<Result<List<Plant>>> = makeSyncFlow {
-        plantRemoteRepository.getAllInList(GetAllPlantsInListRequest(ids))
+        plantRemoteRepository.getAllInList(ids)
             .map(PlantResponse::toDomain)
     }
         .onStart { Timber.d("start getting plants by ids") }

@@ -8,6 +8,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import ru.filimonov.hpa.common.json.JsonDeserializers
 import ru.filimonov.hpa.common.json.JsonSerializers
+import ru.filimonov.hpa.common.utils.time.CalendarDeserializer
+import ru.filimonov.hpa.common.utils.time.CalendarSerializer
 import ru.filimonov.hpa.common.utils.time.LocalDateDeserializer
 import ru.filimonov.hpa.common.utils.time.LocalDateSerializer
 import ru.filimonov.hpa.common.utils.time.LocalTimeDeserializer
@@ -42,11 +44,13 @@ internal interface JsonModule {
             localDateSerializer: LocalDateSerializer,
             localTimeSerializer: LocalTimeSerializer,
             zonedDateTimeSerializer: ZonedDateTimeSerializer,
+            calendarSerializer: CalendarSerializer,
         ): JsonSerializers {
             return JsonSerializers(
                 localDateSerializer,
                 localTimeSerializer,
                 zonedDateTimeSerializer,
+                calendarSerializer,
             )
         }
 
@@ -55,12 +59,14 @@ internal interface JsonModule {
         fun jsonDeserializers(
             localDateDeserializer: LocalDateDeserializer,
             localTimeDeserializer: LocalTimeDeserializer,
-            zonedDateTimeDeserializer: ZonedDateTimeDeserializer
+            zonedDateTimeDeserializer: ZonedDateTimeDeserializer,
+            calendarDeserializer: CalendarDeserializer,
         ): JsonDeserializers {
             return JsonDeserializers(
                 localDateDeserializer,
                 localTimeDeserializer,
                 zonedDateTimeDeserializer,
+                calendarDeserializer,
             )
         }
     }
