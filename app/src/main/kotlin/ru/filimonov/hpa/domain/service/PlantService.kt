@@ -1,4 +1,4 @@
-package ru.filimonov.hpa.domain.service.device
+package ru.filimonov.hpa.domain.service
 
 import kotlinx.coroutines.flow.Flow
 import ru.filimonov.hpa.domain.model.Plant

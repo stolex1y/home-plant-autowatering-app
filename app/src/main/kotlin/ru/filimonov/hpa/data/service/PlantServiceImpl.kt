@@ -14,7 +14,7 @@ import ru.filimonov.hpa.data.remote.model.plant.toAddPlantRequest
 import ru.filimonov.hpa.data.remote.model.plant.toUpdatePlantRequest
 import ru.filimonov.hpa.data.remote.repository.PlantRemoteRepository
 import ru.filimonov.hpa.domain.model.Plant
-import ru.filimonov.hpa.domain.service.device.PlantService
+import ru.filimonov.hpa.domain.service.PlantService
 import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
