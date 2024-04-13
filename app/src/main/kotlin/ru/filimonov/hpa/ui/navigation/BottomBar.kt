@@ -18,10 +18,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import ru.filimonov.hpa.R
 import ru.filimonov.hpa.ui.common.navigation.Destination
 import ru.filimonov.hpa.ui.devices.DevicesScreenDestination
 import ru.filimonov.hpa.ui.theme.HpaTheme
-import ru.filimonov.hpa.ui.widgets.R
 
 @Composable
 fun HpaBottomBar(
@@ -34,12 +34,6 @@ fun HpaBottomBar(
     ) {
         tabs.forEach { tab ->
             NavigationBarItem(
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                ),
                 selected = tab == currentTab,
                 onClick = { onNavigateToDestination(tab) },
                 icon = {
@@ -73,14 +67,12 @@ private fun BottomBarPreview() {
     val TestDestination = object : BottomBarDestination {
         override val title: Int = R.string.profile
         override val icon: Int = ru.filimonov.hpa.ui.common.R.drawable.settings
-        override val path: Destination.Path
-            get() = TODO("Not yet implemented")
+        override val path: Destination.Path = Destination.Path()
     }
     val destinations: Array<out BottomBarDestination> = arrayOf(
         DevicesScreenDestination,
         TestDestination
     )
-
 
     HpaTheme {
         Scaffold(
