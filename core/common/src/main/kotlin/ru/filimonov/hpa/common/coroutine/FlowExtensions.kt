@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlin.time.Duration
@@ -118,7 +119,7 @@ object FlowExtensions {
     fun <T, R> Flow<Result<T>>.flatMapLatestResult(transform: suspend (value: T) -> Flow<Result<R>>): Flow<Result<R>> =
         flatMapLatest {
             if (it.isFailure)
-                flow { Result.failure<R>(it.exceptionOrNull()!!) }
+                flowOf(Result.failure(it.exceptionOrNull()!!))
             else
                 transform(it.getOrNull()!!)
         }
