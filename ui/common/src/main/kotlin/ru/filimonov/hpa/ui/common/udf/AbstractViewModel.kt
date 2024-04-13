@@ -8,13 +8,16 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -28,50 +31,38 @@ import javax.inject.Named
 import javax.inject.Provider
 
 abstract class AbstractViewModel<E : IEvent, D : IData, S : IState>(
-    initData: D,
+    private val initData: D,
     private val stateFactory: IState.Factory<S>,
     @Named(APPLICATION_SCOPE) protected val applicationScope: CoroutineScope,
     private val workManager: Provider<WorkManager>,
 ) : ViewModel() {
 
-    private var dataLoadingJob: Job? = null
+    private val reloadEvent: Channel<Unit> = Channel()
 
     private val _state: MutableStateFlow<S> = MutableStateFlow(stateFactory.initState)
     val state: StateFlow<S> = _state.asStateFlow()
     var prevState: S = stateFactory.initState
         private set
 
-    private val _data: MutableStateFlow<D> = MutableStateFlow(initData)
-    val data: StateFlow<D> = _data.asStateFlow()
+    val data: StateFlow<D> = initDataLoading()
 
     private var work: StateFlow<WorkInfo>? = null
     protected var lastFinishedWork: WorkInfo? = null
         private set
 
+    init {
+        reloadData()
+    }
+
+    protected fun reloadData() {
+        viewModelScope.launch {
+            reloadEvent.send(Unit)
+        }
+    }
+
     abstract fun dispatchEvent(event: E)
 
     protected abstract fun loadData(): Flow<Result<D>>
-
-    private fun setErrorStateWith(@StringRes errorMsg: Int) {
-        updateState(stateFactory.errorState(errorMsg))
-    }
-
-    protected fun startLoadingData() {
-        val currentLoadingJob = dataLoadingJob
-        if (currentLoadingJob != null) {
-            currentLoadingJob.cancel()
-            dataLoadingJob = null
-        }
-        dataLoadingJob = viewModelScope.launch {
-            loadData().handleError()
-                .mapNotNull { it.getOrNull() }
-                .collectLatest {
-                    _data.value = it
-                    if (state.value == stateFactory.initState)
-                        _state.value = stateFactory.loadedState
-                }
-        }
-    }
 
     @StringRes
     protected open fun parseError(error: Throwable): Int {
@@ -124,6 +115,29 @@ abstract class AbstractViewModel<E : IEvent, D : IData, S : IState>(
                 lastFinishedWork = finishedWorkInfo
             }
         }
+    }
+
+    private fun setErrorStateWith(@StringRes errorMsg: Int) {
+        updateState(stateFactory.errorState(errorMsg))
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun initDataLoading(): StateFlow<D> {
+        return reloadEvent.consumeAsFlow().flatMapLatest {
+            loadData()
+        }
+            .handleError()
+            .mapNotNull { it.getOrNull() }
+            .onEach {
+                if (_state.value == stateFactory.initState) {
+                    _state.value = stateFactory.loadedState
+                }
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = initData
+            )
     }
 
     private fun <T> Flow<Result<T>>.handleError(): Flow<Result<T>> {

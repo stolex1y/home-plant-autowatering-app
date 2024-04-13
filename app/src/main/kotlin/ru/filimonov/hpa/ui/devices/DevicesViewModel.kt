@@ -12,8 +12,8 @@ import ru.filimonov.hpa.common.coroutine.CoroutineNames.DEFAULT_DISPATCHER
 import ru.filimonov.hpa.common.coroutine.FlowExtensions.flatMapLatestResult
 import ru.filimonov.hpa.common.coroutine.FlowExtensions.mapLatestResult
 import ru.filimonov.hpa.domain.model.Plant
+import ru.filimonov.hpa.domain.service.PlantService
 import ru.filimonov.hpa.domain.service.device.DeviceService
-import ru.filimonov.hpa.domain.service.device.PlantService
 import ru.filimonov.hpa.ui.common.udf.AbstractViewModel
 import ru.filimonov.hpa.ui.common.udf.IData
 import ru.filimonov.hpa.ui.common.udf.IEvent
@@ -40,11 +40,9 @@ class DevicesViewModel @Inject constructor(
     workManager = workManager,
 ) {
 
-    fun reloadData() = dispatchEvent(Event.Load)
-
     override fun dispatchEvent(event: Event) {
         when (event) {
-            Event.Load -> startLoadingData()
+            Event.Reload -> reloadData()
         }
     }
 
@@ -74,7 +72,7 @@ class DevicesViewModel @Inject constructor(
     }
 
     sealed interface Event : IEvent {
-        data object Load : Event
+        data object Reload : Event
     }
 
     data class Data(

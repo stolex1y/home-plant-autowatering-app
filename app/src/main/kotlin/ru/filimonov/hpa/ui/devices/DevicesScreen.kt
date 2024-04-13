@@ -1,6 +1,5 @@
 package ru.filimonov.hpa.ui.devices
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,9 +20,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -34,12 +31,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import kotlinx.coroutines.flow.collectLatest
 import ru.filimonov.hpa.R
 import ru.filimonov.hpa.ui.common.navigation.Destination
-import ru.filimonov.hpa.ui.common.udf.SimpleLoadingState
 import ru.filimonov.hpa.ui.devices.model.DeviceCardData
 import ru.filimonov.hpa.ui.devices.model.DeviceWithPlantCardData
 import ru.filimonov.hpa.ui.devices.model.DeviceWithoutPlantCardData
@@ -54,9 +50,8 @@ fun DevicesScreen(
     onAddDevice: () -> Unit,
     devicesViewModel: DevicesViewModel = hiltViewModel(),
 ) {
-    val data by devicesViewModel.dataAsState()
-    val state by devicesViewModel.state()
-    reloadData(viewModel = devicesViewModel)
+    val data by devicesViewModel.data.collectAsStateWithLifecycle()
+    val state by devicesViewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         floatingActionButton = { AddDeviceButton(onClick = onAddDevice) },
@@ -215,42 +210,6 @@ private fun AddDeviceButton(
 
     }
 }
-
-@SuppressLint("ComposableNaming")
-@Composable
-private fun reloadData(viewModel: DevicesViewModel) {
-    LaunchedEffect(viewModel) {
-        viewModel.reloadData()
-    }
-}
-
-@Composable
-private fun DevicesViewModel.dataAsState() = produceState(
-    key1 = this,
-    initialValue = DevicesViewModel.Data(),
-) {
-    data.collectLatest {
-        value = it
-    }
-}
-
-@Composable
-private fun DevicesViewModel.state() = produceState<SimpleLoadingState>(
-    key1 = this,
-    initialValue = SimpleLoadingState.Initial
-) {
-    state.collectLatest {
-        value = it
-    }
-}
-
-/*
-@Composable
-private fun ErrorToast(state: CurrentWeatherViewModel.State) {
-    if (state is CurrentWeatherViewModel.State.Error) {
-        Toast.makeText(LocalContext.current, state.error, Toast.LENGTH_LONG).show()
-    }
-}*/
 
 @Composable
 @Preview(showBackground = true, showSystemUi = true)
