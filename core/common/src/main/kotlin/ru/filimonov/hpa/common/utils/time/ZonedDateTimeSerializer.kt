@@ -12,10 +12,8 @@ import java.lang.reflect.Type
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.reflect.KClass
 
-@Singleton
 class ZonedDateTimeSerializer @Inject constructor() : JsonSerializer<ZonedDateTime> {
     override val type: KClass<ZonedDateTime> = ZonedDateTime::class
 
@@ -31,7 +29,6 @@ class ZonedDateTimeSerializer @Inject constructor() : JsonSerializer<ZonedDateTi
     }
 }
 
-@Singleton
 class ZonedDateTimeDeserializer @Inject constructor() : JsonDeserializer<ZonedDateTime> {
     override val type: KClass<ZonedDateTime> = ZonedDateTime::class
 

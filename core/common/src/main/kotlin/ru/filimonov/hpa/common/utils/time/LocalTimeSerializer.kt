@@ -12,10 +12,8 @@ import ru.filimonov.hpa.common.utils.time.DateUtils.toLocalTime
 import java.lang.reflect.Type
 import java.time.LocalTime
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.reflect.KClass
 
-@Singleton
 class LocalTimeSerializer @Inject constructor() : JsonSerializer<LocalTime> {
     override val type: KClass<LocalTime> = LocalTime::class
 
@@ -30,7 +28,6 @@ class LocalTimeSerializer @Inject constructor() : JsonSerializer<LocalTime> {
     }
 }
 
-@Singleton
 class LocalTimeDeserializer @Inject constructor() : JsonDeserializer<LocalTime> {
     override val type: KClass<LocalTime> = LocalTime::class
 
