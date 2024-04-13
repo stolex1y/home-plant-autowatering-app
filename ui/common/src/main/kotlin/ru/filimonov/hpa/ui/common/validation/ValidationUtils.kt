@@ -1,4 +1,4 @@
-package ru.filimonov.hpa.ui.util.validation
+package ru.filimonov.hpa.ui.common.validation
 
 import androidx.compose.runtime.saveable.listSaver
 import com.google.gson.Gson

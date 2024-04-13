@@ -18,10 +18,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import ru.filimonov.hpa.R
 import ru.filimonov.hpa.ui.common.navigation.Destination
 import ru.filimonov.hpa.ui.devices.DevicesScreenDestination
 import ru.filimonov.hpa.ui.theme.HpaTheme
+import ru.filimonov.hpa.ui.widgets.R
 
 @Composable
 fun HpaBottomBar(

@@ -1,7 +1,7 @@
-package ru.filimonov.hpa.ui.util.validation
+package ru.filimonov.hpa.ui.common.validation
 
 import androidx.annotation.StringRes
-import ru.filimonov.hpa.R
+import ru.filimonov.hpa.ui.common.R
 import java.io.Serializable
 
 object Conditions {

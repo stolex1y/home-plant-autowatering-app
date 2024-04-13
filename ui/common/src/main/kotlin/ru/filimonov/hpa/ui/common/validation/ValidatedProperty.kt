@@ -1,4 +1,4 @@
-package ru.filimonov.hpa.ui.util.validation
+package ru.filimonov.hpa.ui.common.validation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import ru.filimonov.hpa.ui.util.validation.Condition.Companion.isValid
+import ru.filimonov.hpa.ui.common.validation.Condition.Companion.isValid
 
 class ValidatedProperty<T>(
     initialValue: T,

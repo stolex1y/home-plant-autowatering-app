@@ -2,4 +2,5 @@
 <resources>
     <string name="internal_error">Произошла внутренняя ошибка приложения…</string>
     <string name="background_work">Фоновая работа</string>
+    <string name="not_valid_mac">Значение должно быть валидным MAC-адресом</string>o9
 </resources>

@@ -1,4 +1,4 @@
-package ru.filimonov.hpa.ui.util.validation
+package ru.filimonov.hpa.ui.common.validation
 
 import androidx.annotation.StringRes
 import java.io.Serializable
