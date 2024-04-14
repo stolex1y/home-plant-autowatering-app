@@ -2,6 +2,7 @@ import AppDependencies.moduleImplementation
 import modules.AppModule
 import modules.CommonModule
 import modules.UiCommonModule
+import modules.UiWidgetsModule
 
 plugins {
     alias(libs.plugins.android.application)
@@ -70,6 +71,7 @@ android {
 dependencies {
     moduleImplementation(UiCommonModule)
     moduleImplementation(CommonModule)
+    moduleImplementation(UiWidgetsModule)
 
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)

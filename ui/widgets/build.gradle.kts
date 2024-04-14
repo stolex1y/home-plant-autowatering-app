@@ -1,3 +1,6 @@
+import AppDependencies.moduleImplementation
+import modules.CommonModule
+import modules.UiCommonModule
 import modules.UiWidgetsModule
 
 plugins {
@@ -36,21 +39,34 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
+        compose = true
+        buildConfig = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.androidx.compose.compiler.get()
     }
 
     compileOptions {
         sourceCompatibility = moduleConfig.sourceJdk
         targetCompatibility = moduleConfig.targetJdk
     }
+
     kotlinOptions {
         jvmTarget = moduleConfig.targetJdk.majorVersion
     }
 }
 
 dependencies {
+    moduleImplementation(CommonModule)
+    moduleImplementation(UiCommonModule)
+
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlinx.coroutines.android)
+
+    val composeBom = platform(libs.androidx.compose.bom)
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
 
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
@@ -65,6 +81,23 @@ dependencies {
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.annotation)
     implementation(libs.timber)
+
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.ui.util)
+    implementation(libs.androidx.compose.ui.viewbinding)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.animation)
+    implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.compose.ui.tooling.preview)
 
     implementation(libs.google.android.material)
 
