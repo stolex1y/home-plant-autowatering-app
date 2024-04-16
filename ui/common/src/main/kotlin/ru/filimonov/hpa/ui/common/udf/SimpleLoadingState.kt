@@ -14,6 +14,8 @@ sealed interface SimpleLoadingState : IState {
 
             override fun errorState(error: Int): SimpleLoadingState =
                 Error(error)
+
+            override fun isError(state: SimpleLoadingState): Boolean = state is Error
         }
     }
 }

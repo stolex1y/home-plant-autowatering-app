@@ -8,5 +8,6 @@ interface IState {
         val loadingState: S
         val loadedState: S
         fun errorState(@StringRes error: Int): S
+        fun isError(state: S): Boolean
     }
 }
