@@ -48,7 +48,7 @@ internal class UserAuthServiceImpl @Inject constructor(
         } catch (ex: Throwable) {
             Timber.d("fail reauthenticate: ${ex.localizedMessage}")
             if (ex is HttpException && ex.isClientError()) {
-                oAuthTokenService.resetAll()
+                cleanSession()
             }
             return false
         }
