@@ -4,10 +4,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,9 +19,9 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,12 +38,17 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import ru.filimonov.hpa.R
 import ru.filimonov.hpa.ui.common.navigation.Destination
+import ru.filimonov.hpa.ui.common.udf.SimpleLoadingState
 import ru.filimonov.hpa.ui.devices.model.DeviceCardData
 import ru.filimonov.hpa.ui.devices.model.DeviceWithPlantCardData
 import ru.filimonov.hpa.ui.devices.model.DeviceWithoutPlantCardData
 import ru.filimonov.hpa.ui.navigation.BottomBarDestination
 import ru.filimonov.hpa.ui.navigation.HpaBottomBar
 import ru.filimonov.hpa.ui.theme.HpaTheme
+import ru.filimonov.hpa.widgets.HpaLoading
+import ru.filimonov.hpa.widgets.HpaScaffold
+import ru.filimonov.hpa.widgets.HpaSnackbarHost
+import ru.filimonov.hpa.widgets.SnackbarState
 import java.util.UUID
 
 @Composable
@@ -50,10 +57,17 @@ fun DevicesScreen(
     onAddDevice: () -> Unit,
     devicesViewModel: DevicesViewModel = hiltViewModel(),
 ) {
+    LaunchedEffect(devicesViewModel) {
+        devicesViewModel.dispatchEvent(DevicesViewModel.Event.Reload)
+    }
+
     val data by devicesViewModel.data.collectAsStateWithLifecycle()
     val state by devicesViewModel.state.collectAsStateWithLifecycle()
+    val snackbarState = SnackbarState.rememberSnackbarState()
 
-    Scaffold(
+    HpaScaffold(
+        modifier = Modifier.consumeWindowInsets(WindowInsets.navigationBars),
+        snackbarHost = { HpaSnackbarHost(snackbarState = snackbarState) },
         floatingActionButton = { AddDeviceButton(onClick = onAddDevice) },
         bottomBar = {
             HpaBottomBar(
@@ -61,17 +75,39 @@ fun DevicesScreen(
                 currentTab = DevicesScreenDestination
             )
         },
-        modifier = Modifier
-            .fillMaxSize()
-            .consumeWindowInsets(WindowInsets.navigationBars),
-    ) { insetsPadding ->
-        Content(
-            devices = data.devices,
-            modifier = Modifier
-                .padding(insetsPadding)
-                .fillMaxSize(),
-        )
+    ) {
+        when (val stateValue = state) {
+            is SimpleLoadingState.Error -> {
+                if (devicesViewModel.prevState == SimpleLoadingState.Initial) {
+                    Loading()
+                } else {
+                    Content(
+                        devices = data.devices,
+                        modifier = Modifier
+                            .fillMaxSize(),
+                    )
+                }
+                snackbarState.replaceSnackbar(messageRes = stateValue.error)
+            }
+
+            SimpleLoadingState.Initial -> {
+                Loading()
+            }
+
+            SimpleLoadingState.Loaded -> {
+                Content(
+                    devices = data.devices,
+                    modifier = Modifier
+                        .fillMaxSize(),
+                )
+            }
+
+            SimpleLoadingState.Loading -> {
+                Loading()
+            }
+        }
     }
+
 }
 
 fun NavGraphBuilder.addDevicesScreen(
@@ -116,7 +152,6 @@ private fun Content(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 columns = GridCells.Fixed(2),
                 modifier = Modifier
-                    .padding(16.dp)
                     .fillMaxWidth()
             ) {
                 items(items = devices, key = DeviceCardData::uuid) {
@@ -127,7 +162,18 @@ private fun Content(
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+}
+
+@Composable
+private fun Loading() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        HpaLoading()
     }
 }
 
@@ -204,7 +250,7 @@ private fun AddDeviceButton(
 ) {
     Button(
         shape = RoundedCornerShape(100),
-        modifier = Modifier,
+        modifier = modifier,
         onClick = onClick
     ) {
 

@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.core.view.WindowCompat
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import dagger.hilt.android.AndroidEntryPoint
