@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="required_field">Обязательное поле</string>
+    <string name="optional_field">Необязательное поле</string>
+    <string name="button">Кнопка</string>
+    <string name="title">Название</string>
+</resources>
