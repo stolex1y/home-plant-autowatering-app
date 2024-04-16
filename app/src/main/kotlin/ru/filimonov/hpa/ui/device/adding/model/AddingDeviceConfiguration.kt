@@ -3,7 +3,7 @@ package ru.filimonov.hpa.ui.device.adding.model
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.saveable.mapSaver
 import ru.filimonov.hpa.R
-import ru.filimonov.hpa.domain.model.DeviceConfiguration
+import ru.filimonov.hpa.domain.model.device.DomainDeviceConfiguration
 import ru.filimonov.hpa.ui.common.validation.Conditions
 import ru.filimonov.hpa.ui.common.validation.ValidatedEntity
 import ru.filimonov.hpa.ui.common.validation.ValidatedProperty
@@ -26,7 +26,7 @@ class AddingDeviceConfiguration(
         )
     )
 
-    fun toDomain(deviceId: UUID, serverUrl: URL) = DeviceConfiguration(
+    fun toDomain(deviceId: UUID, serverUrl: URL) = DomainDeviceConfiguration(
         ssid = ssid.value,
         pass = pass.value,
         deviceId = deviceId,

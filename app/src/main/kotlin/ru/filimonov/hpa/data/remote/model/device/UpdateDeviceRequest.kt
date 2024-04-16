@@ -1,14 +1,16 @@
 package ru.filimonov.hpa.data.remote.model.device
 
-import ru.filimonov.hpa.domain.model.Device
+import ru.filimonov.hpa.domain.model.device.DomainDevice
 import java.util.UUID
 
 data class UpdateDeviceRequest(
     val uuid: UUID,
-    val plantId: UUID? = null
+    val plantId: UUID? = null,
+    val name: String,
 )
 
-fun Device.toUpdateDeviceRequest() = UpdateDeviceRequest(
+fun DomainDevice.toUpdateDeviceRequest() = UpdateDeviceRequest(
     uuid = uuid,
     plantId = plantId,
+    name = name,
 )

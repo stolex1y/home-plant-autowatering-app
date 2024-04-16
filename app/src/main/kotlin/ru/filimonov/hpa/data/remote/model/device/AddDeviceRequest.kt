@@ -1,14 +1,11 @@
 package ru.filimonov.hpa.data.remote.model.device
 
-import ru.filimonov.hpa.domain.model.ExtendedDevice
-import java.util.UUID
+import ru.filimonov.hpa.domain.model.device.DomainDevice
 
 data class AddDeviceRequest(
     val mac: String,
-    val plantId: UUID? = null,
 )
 
-fun ExtendedDevice.toAddDeviceRequest() = AddDeviceRequest(
+fun DomainDevice.toAddDeviceRequest() = AddDeviceRequest(
     mac = mac,
-    plantId = plantId
 )

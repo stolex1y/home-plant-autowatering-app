@@ -22,7 +22,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import ru.filimonov.hpa.R
-import ru.filimonov.hpa.domain.model.DeviceInfo
 import ru.filimonov.hpa.ui.common.navigation.Destination
 import ru.filimonov.hpa.ui.device.adding.model.AddingDeviceConfiguration
 import ru.filimonov.hpa.ui.theme.HpaTheme
@@ -58,7 +57,7 @@ fun DeviceAddingScreen(
             is DeviceAddingViewModel.Data.Filled -> DeviceConfigurationForm(
                 validatedEntity = addingDeviceConfiguration,
                 onAdding = {
-                    viewModel.addDevice(deviceInfo = dataValue.deviceInfo, deviceConfiguration = it)
+                    viewModel.addDevice(domainDeviceInfo = dataValue.domainDeviceInfo, deviceConfiguration = it)
                 },
                 onCancel = onCancel
             )

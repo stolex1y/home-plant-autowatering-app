@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import ru.filimonov.hpa.R
 import ru.filimonov.hpa.common.coroutine.CoroutineNames
 import ru.filimonov.hpa.common.coroutine.FlowExtensions.mapLatestResult
-import ru.filimonov.hpa.domain.model.DeviceInfo
+import ru.filimonov.hpa.domain.model.device.DomainDeviceInfo
 import ru.filimonov.hpa.domain.service.device.DeviceConfiguringService
 import ru.filimonov.hpa.ui.common.udf.AbstractViewModel
 import ru.filimonov.hpa.ui.common.udf.IData
@@ -36,7 +36,7 @@ class DeviceAddingViewModel @Inject constructor(
     workManager = workManager,
 ) {
 
-    fun addDevice(deviceInfo: DeviceInfo, deviceConfiguration: AddingDeviceConfiguration) {
+    fun addDevice(domainDeviceInfo: DomainDeviceInfo, deviceConfiguration: AddingDeviceConfiguration) {
         if (deviceConfiguration.isNotValid) {
             updateState(IllegalStateException("device configuration must be valid"))
             return
@@ -44,9 +44,10 @@ class DeviceAddingViewModel @Inject constructor(
         startWork(
             DeviceAddingWorker.createWorkRequest(
                 AddingDevice(
-                    mac = deviceInfo.mac,
+                    mac = domainDeviceInfo.mac,
                     ssid = deviceConfiguration.ssid.value,
-                    pass = deviceConfiguration.pass.value
+                    pass = deviceConfiguration.pass.value,
+                    name = domainDeviceInfo.mac,
                 )
             ),
             loadingState = State.Adding,
@@ -57,14 +58,14 @@ class DeviceAddingViewModel @Inject constructor(
     override fun dispatchEvent(event: Event) {
         when (event) {
             is Event.Add -> {
-                addDevice(event.deviceInfo, event.deviceConfiguration)
+                addDevice(event.domainDeviceInfo, event.deviceConfiguration)
             }
         }
     }
 
     override fun loadData(): Flow<Result<Data.Filled>> {
         return deviceConfigurationService.getDeviceInfo().mapLatestResult {
-            Data.Filled(deviceInfo = it)
+            Data.Filled(domainDeviceInfo = it)
         }
     }
 
@@ -98,13 +99,13 @@ class DeviceAddingViewModel @Inject constructor(
 
     sealed interface Event : IEvent {
         data class Add(
-            val deviceInfo: DeviceInfo, val deviceConfiguration: AddingDeviceConfiguration
+            val domainDeviceInfo: DomainDeviceInfo, val deviceConfiguration: AddingDeviceConfiguration
         ) : Event
     }
 
     sealed interface Data : IData {
         data class Filled(
-            val deviceInfo: DeviceInfo
+            val domainDeviceInfo: DomainDeviceInfo
         ) : Data
 
         data object Empty : Data

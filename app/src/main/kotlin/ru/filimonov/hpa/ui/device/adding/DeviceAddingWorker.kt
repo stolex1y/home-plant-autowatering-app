@@ -9,8 +9,8 @@ import dagger.assisted.AssistedInject
 import ru.filimonov.hpa.BuildConfig
 import ru.filimonov.hpa.R
 import ru.filimonov.hpa.domain.errors.BadRequestException
-import ru.filimonov.hpa.domain.model.DeviceConfiguration
-import ru.filimonov.hpa.domain.model.ExtendedDevice
+import ru.filimonov.hpa.domain.model.device.DomainDevice
+import ru.filimonov.hpa.domain.model.device.DomainDeviceConfiguration
 import ru.filimonov.hpa.domain.service.device.DeviceConfiguringService
 import ru.filimonov.hpa.domain.service.device.DeviceService
 import ru.filimonov.hpa.ui.common.notification.NotificationUtils
@@ -37,12 +37,13 @@ class DeviceAddingWorker @AssistedInject constructor(
 ) {
     override suspend fun action(input: AddingDevice): kotlin.Result<UUID> {
         deviceService.add(
-            ExtendedDevice(
+            DomainDevice(
                 mac = input.mac,
+                name = input.name,
             )
         ).onSuccess { addedDevice ->
             deviceConfiguringService.sendConfiguration(
-                DeviceConfiguration(
+                DomainDeviceConfiguration(
                     ssid = input.ssid,
                     pass = input.pass,
                     deviceId = addedDevice.uuid,
