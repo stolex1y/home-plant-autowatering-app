@@ -8,24 +8,24 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 abstract class ValidatedEntity {
-    private val _props: MutableList<ValidatedProperty<Any>> = mutableListOf()
-    val props: List<ValidatedProperty<Any>> = _props
+    private val props: MutableList<ValidatedProperty<*>> = mutableListOf()
 
     protected fun <T> addValidatedProperty(
         initialValue: T,
         condition: Condition<T> = Conditions.None(),
-    ): ValidatedProperty<T> =
-        ValidatedProperty(initialValue, condition)
+    ): ValidatedProperty<T> = ValidatedProperty(initialValue, condition).apply {
+        props.add(this)
+    }
 
     val isValidAsFlow: Flow<Boolean>
         get() {
-            return combine(_props.map { it.isValidAsFlow }) { propsValidity ->
+            return combine(props.map { it.isValidAsFlow }) { propsValidity ->
                 propsValidity.all { it }
             }.distinctUntilChanged()
         }
 
     val isValid: Boolean
-        get() = _props.all { it.isValid }
+        get() = props.all { it.isValid }
 
 
     val isValidAsState: State<Boolean>

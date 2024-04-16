@@ -8,13 +8,16 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import ru.filimonov.hpa.BuildConfig
 import ru.filimonov.hpa.R
+import ru.filimonov.hpa.domain.errors.BadRequestException
 import ru.filimonov.hpa.domain.model.DeviceConfiguration
 import ru.filimonov.hpa.domain.model.ExtendedDevice
 import ru.filimonov.hpa.domain.service.device.DeviceConfiguringService
 import ru.filimonov.hpa.domain.service.device.DeviceService
 import ru.filimonov.hpa.ui.common.notification.NotificationUtils
 import ru.filimonov.hpa.ui.common.work.AbstractWorker
+import ru.filimonov.hpa.ui.common.work.WorkErrorWrapper
 import ru.filimonov.hpa.ui.device.adding.model.AddingDevice
+import ru.filimonov.hpa.ui.device.adding.model.AddingErrors
 import java.net.URL
 import java.util.UUID
 
@@ -49,10 +52,14 @@ class DeviceAddingWorker @AssistedInject constructor(
                 return kotlin.Result.success(addedDevice.uuid)
             }.onFailure {
                 deviceService.delete(addedDevice.uuid)
-                return kotlin.Result.failure(it)
+                return kotlin.Result.failure(WorkErrorWrapper(AddingErrors.InvalidDeviceConfigurationError))
             }
         }.onFailure {
-            return kotlin.Result.failure(it)
+            return if (it is BadRequestException) {
+                kotlin.Result.failure(WorkErrorWrapper(AddingErrors.DeviceAlreadyAddedError))
+            } else {
+                kotlin.Result.failure(it)
+            }
         }
         return kotlin.Result.failure(IllegalStateException())
     }
@@ -62,7 +69,10 @@ class DeviceAddingWorker @AssistedInject constructor(
         val NOTIFICATION_ID = NotificationUtils.getUniqueNotificationId()
 
         fun createWorkRequest(entity: AddingDevice): OneTimeWorkRequest {
-            return createWorkRequest<DeviceAddingWorker, AddingDevice, UUID>(entity, WORK_NAME)
+            return createWorkRequest<DeviceAddingWorker, AddingDevice, UUID>(
+                entity,
+                WORK_NAME
+            )
         }
     }
 }

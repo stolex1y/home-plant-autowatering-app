@@ -5,6 +5,17 @@
     <string name="profile">Профиль</string>
     <string name="device_name">Устройство %1$s</string>
     <string name="no_devices_found">Не найдено ни одного устройства</string>
-    <string name="not_valid_mac">Значение должно быть валидным MAC-адресом</string>
     <string name="device_adding">Добавление устройства…</string>
+    <string name="device_added">Устройство успешно добавлено</string>
+    <string name="required_field">Поле не может быть пустым</string>
+    <string name="canceling">Отмена</string>
+    <string name="ssid">SSID (Название Wi-Fi сети)</string>
+    <string name="pass">Пароль</string>
+    <string name="add">Добавить</string>
+    <string name="cancel">Отменить</string>
+    <string name="device_already_added">Данное устройство уже добавлено. Удалите устройство, прежде чем снова добавить его.</string>
+    <string name="welcome_with_name">Добро пожаловать, %1$s!</string>
+    <string name="welcome">Добро пожаловать!</string>
+    <string name="device_adding_title">Добавление устройства</string>
+    <string name="invalid_device_configuration">Устройству не удалось подключиться к указанной сети. Проверьте правильность введенных данных или доступность сети Wi-Fi.</string>
 </resources>
