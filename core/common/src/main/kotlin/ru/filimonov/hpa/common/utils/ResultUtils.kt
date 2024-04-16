@@ -22,3 +22,11 @@ fun <T1, T2> combineResults(
 ): Result<Unit> {
     return combineResults(result1, result2) { _, _ -> }
 }
+
+fun <T> Result<T>.mapException(mapper: (t: Throwable) -> Throwable): Result<T> {
+    return if (this.isFailure) {
+        Result.failure(mapper(this.exceptionOrNull()!!))
+    } else {
+        this
+    }
+}

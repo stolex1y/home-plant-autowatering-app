@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import ru.filimonov.hpa.common.coroutine.CoroutineNames
 import ru.filimonov.hpa.common.coroutine.FlowExtensions.makeSyncFlow
+import ru.filimonov.hpa.data.remote.mapExceptionToDomain
+import ru.filimonov.hpa.data.remote.mapLatestResultExceptionToDomain
 import ru.filimonov.hpa.data.remote.model.device.DeviceResponse
 import ru.filimonov.hpa.data.remote.model.device.toAddDeviceRequest
 import ru.filimonov.hpa.data.remote.model.device.toUpdateDeviceRequest
@@ -31,6 +33,7 @@ class DeviceServiceImpl @Inject constructor(
         .onStart { Timber.d("start getting all devices") }
         .distinctUntilChanged()
         .onEach { Timber.v("get new all devices") }
+        .mapLatestResultExceptionToDomain()
         .flowOn(dispatcher)
 
     override suspend fun add(device: ExtendedDevice): Result<Device> = runCatching {
@@ -40,7 +43,7 @@ class DeviceServiceImpl @Inject constructor(
             Timber.d("successfully added")
             addedDevice
         }
-    }
+    }.mapExceptionToDomain()
 
     override suspend fun delete(uuid: UUID): Result<Unit> = runCatching {
         withContext(dispatcher) {
@@ -48,7 +51,7 @@ class DeviceServiceImpl @Inject constructor(
             deviceRemoteRepository.delete(uuid)
             Timber.d("successfully added")
         }
-    }
+    }.mapExceptionToDomain()
 
     override suspend fun update(device: Device): Result<Unit> = runCatching {
         withContext(dispatcher) {
@@ -56,5 +59,5 @@ class DeviceServiceImpl @Inject constructor(
             deviceRemoteRepository.update(device.uuid, device.toUpdateDeviceRequest()).toDomain()
             Timber.d("successfully updated")
         }
-    }
+    }.mapExceptionToDomain()
 }

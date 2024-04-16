@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import ru.filimonov.hpa.common.coroutine.CoroutineNames
 import ru.filimonov.hpa.common.coroutine.FlowExtensions.makeSyncFlow
+import ru.filimonov.hpa.data.remote.mapExceptionToDomain
+import ru.filimonov.hpa.data.remote.mapLatestResultExceptionToDomain
 import ru.filimonov.hpa.data.remote.model.plant.PlantResponse
 import ru.filimonov.hpa.data.remote.model.plant.toAddPlantRequest
 import ru.filimonov.hpa.data.remote.model.plant.toUpdatePlantRequest
@@ -31,6 +33,7 @@ class PlantServiceImpl @Inject constructor(
         .onStart { Timber.d("start getting plants by ids") }
         .distinctUntilChanged()
         .onEach { Timber.v("get new plants by ids") }
+        .mapLatestResultExceptionToDomain()
         .flowOn(dispatcher)
 
     override suspend fun add(plant: Plant): Result<Plant> = runCatching {
@@ -40,7 +43,7 @@ class PlantServiceImpl @Inject constructor(
             Timber.d("successfully added")
             addedPlant
         }
-    }
+    }.mapExceptionToDomain()
 
     override suspend fun delete(uuid: UUID): Result<Unit> = runCatching {
         withContext(dispatcher) {
@@ -48,7 +51,7 @@ class PlantServiceImpl @Inject constructor(
             plantRemoteRepository.delete(uuid)
             Timber.d("successfully added")
         }
-    }
+    }.mapExceptionToDomain()
 
     override suspend fun update(plant: Plant): Result<Unit> = runCatching {
         withContext(dispatcher) {
@@ -56,5 +59,5 @@ class PlantServiceImpl @Inject constructor(
             plantRemoteRepository.update(plant.uuid, plant.toUpdatePlantRequest()).toDomain()
             Timber.d("successfully updated")
         }
-    }
+    }.mapExceptionToDomain()
 }
