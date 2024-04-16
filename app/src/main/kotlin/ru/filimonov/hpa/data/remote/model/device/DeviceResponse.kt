@@ -10,6 +10,7 @@ data class DeviceResponse(
     val createdDate: Calendar,
     val name: String,
     val photoId: UUID?,
+    val mac: String,
 ) {
     fun toDomain() = DomainDevice(
         uuid = uuid,
@@ -17,5 +18,6 @@ data class DeviceResponse(
         createdDate = createdDate,
         photoId = photoId,
         name = name,
+        mac = mac,
     )
 }
