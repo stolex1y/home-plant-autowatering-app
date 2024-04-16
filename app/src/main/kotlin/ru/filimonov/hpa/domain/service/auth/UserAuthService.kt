@@ -2,7 +2,7 @@ package ru.filimonov.hpa.domain.service.auth
 
 import com.google.firebase.auth.AuthCredential
 import kotlinx.coroutines.flow.Flow
-import ru.filimonov.hpa.domain.model.UserAccount
+import ru.filimonov.hpa.domain.model.DomainUserAccount
 
 interface UserAuthService {
     /**
@@ -11,7 +11,7 @@ interface UserAuthService {
      *
      * @return null - if the token has expired or it is null.
      */
-    suspend fun getUserAccount(): UserAccount?
+    suspend fun getUserAccount(): DomainUserAccount?
 
     /**
      * Re-authenticate using a refresh token.

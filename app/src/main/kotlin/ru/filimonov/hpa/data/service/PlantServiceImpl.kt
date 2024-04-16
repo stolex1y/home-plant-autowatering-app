@@ -15,7 +15,7 @@ import ru.filimonov.hpa.data.remote.model.plant.PlantResponse
 import ru.filimonov.hpa.data.remote.model.plant.toAddPlantRequest
 import ru.filimonov.hpa.data.remote.model.plant.toUpdatePlantRequest
 import ru.filimonov.hpa.data.remote.repository.PlantRemoteRepository
-import ru.filimonov.hpa.domain.model.Plant
+import ru.filimonov.hpa.domain.model.DomainPlant
 import ru.filimonov.hpa.domain.service.PlantService
 import timber.log.Timber
 import java.util.UUID
@@ -26,7 +26,7 @@ class PlantServiceImpl @Inject constructor(
     private val plantRemoteRepository: PlantRemoteRepository,
     @Named(CoroutineNames.IO_DISPATCHER) private val dispatcher: CoroutineDispatcher,
 ) : PlantService {
-    override fun getAllInList(ids: List<UUID>): Flow<Result<List<Plant>>> = makeSyncFlow {
+    override fun getAllInList(ids: List<UUID>): Flow<Result<List<DomainPlant>>> = makeSyncFlow {
         plantRemoteRepository.getAllInList(ids)
             .map(PlantResponse::toDomain)
     }
@@ -36,7 +36,7 @@ class PlantServiceImpl @Inject constructor(
         .mapLatestResultExceptionToDomain()
         .flowOn(dispatcher)
 
-    override suspend fun add(plant: Plant): Result<Plant> = runCatching {
+    override suspend fun add(plant: DomainPlant): Result<DomainPlant> = runCatching {
         withContext(dispatcher) {
             Timber.d("add new plant")
             val addedPlant = plantRemoteRepository.add(plant.toAddPlantRequest()).toDomain()
@@ -53,7 +53,7 @@ class PlantServiceImpl @Inject constructor(
         }
     }.mapExceptionToDomain()
 
-    override suspend fun update(plant: Plant): Result<Unit> = runCatching {
+    override suspend fun update(plant: DomainPlant): Result<Unit> = runCatching {
         withContext(dispatcher) {
             Timber.d("update plant with id - ${plant.uuid}")
             plantRemoteRepository.update(plant.uuid, plant.toUpdatePlantRequest()).toDomain()

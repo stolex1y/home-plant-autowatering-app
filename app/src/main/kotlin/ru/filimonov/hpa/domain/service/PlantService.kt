@@ -1,12 +1,12 @@
 package ru.filimonov.hpa.domain.service
 
 import kotlinx.coroutines.flow.Flow
-import ru.filimonov.hpa.domain.model.Plant
+import ru.filimonov.hpa.domain.model.DomainPlant
 import java.util.UUID
 
 interface PlantService {
-    fun getAllInList(ids: List<UUID>): Flow<Result<List<Plant>>>
-    suspend fun add(plant: Plant): Result<Plant>
+    fun getAllInList(ids: List<UUID>): Flow<Result<List<DomainPlant>>>
+    suspend fun add(plant: DomainPlant): Result<DomainPlant>
     suspend fun delete(uuid: UUID): Result<Unit>
-    suspend fun update(plant: Plant): Result<Unit>
+    suspend fun update(plant: DomainPlant): Result<Unit>
 }

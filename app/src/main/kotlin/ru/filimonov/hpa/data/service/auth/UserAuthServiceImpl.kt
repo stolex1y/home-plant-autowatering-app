@@ -10,7 +10,7 @@ import retrofit2.HttpException
 import ru.filimonov.hpa.data.remote.isClientError
 import ru.filimonov.hpa.data.remote.model.auth.ReauthRequest
 import ru.filimonov.hpa.data.remote.repository.AuthRemoteRepository
-import ru.filimonov.hpa.domain.model.UserAccount
+import ru.filimonov.hpa.domain.model.DomainUserAccount
 import ru.filimonov.hpa.domain.service.auth.OAuthTokenService
 import ru.filimonov.hpa.domain.service.auth.UserAuthService
 import timber.log.Timber
@@ -22,7 +22,7 @@ internal class UserAuthServiceImpl @Inject constructor(
     private val oAuthTokenService: OAuthTokenService,
 ) : UserAuthService {
 
-    override suspend fun getUserAccount(): UserAccount? {
+    override suspend fun getUserAccount(): DomainUserAccount? {
         if (firebaseAuth.currentUser != null) {
             if (reloadCurrentUser()) {
                 Timber.d("return reloaded user account")
@@ -105,7 +105,7 @@ internal class UserAuthServiceImpl @Inject constructor(
         }
     }
 
-    private fun FirebaseUser.toUserAccount() = UserAccount(
+    private fun FirebaseUser.toUserAccount() = DomainUserAccount(
         name = displayName,
         email = email,
         photoUrl = photoUrl?.toString(),

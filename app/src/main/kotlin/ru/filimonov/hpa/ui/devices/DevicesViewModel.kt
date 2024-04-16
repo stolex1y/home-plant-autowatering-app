@@ -11,7 +11,7 @@ import ru.filimonov.hpa.common.coroutine.CoroutineNames.APPLICATION_SCOPE
 import ru.filimonov.hpa.common.coroutine.CoroutineNames.DEFAULT_DISPATCHER
 import ru.filimonov.hpa.common.coroutine.FlowExtensions.flatMapLatestResult
 import ru.filimonov.hpa.common.coroutine.FlowExtensions.mapLatestResult
-import ru.filimonov.hpa.domain.model.Plant
+import ru.filimonov.hpa.domain.model.DomainPlant
 import ru.filimonov.hpa.domain.service.PlantService
 import ru.filimonov.hpa.domain.service.device.DeviceService
 import ru.filimonov.hpa.ui.common.udf.AbstractViewModel
@@ -51,7 +51,7 @@ class DevicesViewModel @Inject constructor(
             .flatMapLatestResult { devices ->
                 val plantsFlow =
                     plantService.getAllInList(devices.map { device -> device.uuid })
-                        .mapLatestResult { plants -> plants.associateBy(Plant::uuid) }
+                        .mapLatestResult { plants -> plants.associateBy(DomainPlant::uuid) }
                 plantsFlow.mapLatestResult { plants ->
                     Data(devices = devices.map { device ->
                         val plantId = device.plantId

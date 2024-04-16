@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.filimonov.hpa.common.coroutine.CoroutineNames
-import ru.filimonov.hpa.domain.model.UserAccount
+import ru.filimonov.hpa.domain.model.DomainUserAccount
 import ru.filimonov.hpa.domain.service.auth.UserAuthService
 import ru.filimonov.hpa.ui.common.udf.IState
 import javax.inject.Inject
@@ -74,7 +74,7 @@ class AuthViewModel @Inject constructor(
         data object Loading : State
         data object SigningIn : State
         data class SignedIn(
-            val userAccount: UserAccount
+            val userAccount: DomainUserAccount
         ) : State
 
         data object Expired : State
