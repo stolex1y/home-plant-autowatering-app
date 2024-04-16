@@ -16,6 +16,7 @@ import okhttp3.Route
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import ru.filimonov.hpa.BuildConfig
+import ru.filimonov.hpa.data.remote.isClientError
 import ru.filimonov.hpa.data.remote.repository.AuthRemoteRepository
 import ru.filimonov.hpa.data.remote.repository.DeviceConfigurationRemoteRepository
 import ru.filimonov.hpa.data.remote.repository.DeviceRemoteRepository
@@ -71,7 +72,13 @@ internal interface RemoteRepositoryModule {
         fun logInterceptor(): Interceptor {
             return Interceptor { chain ->
                 Timber.d("make request to ${chain.request().url()}")
-                chain.proceed(chain.request())
+                val response = chain.proceed(chain.request())
+                val networkResponse = response.networkResponse()
+                val responseBody = networkResponse?.body()
+                if (responseBody != null && networkResponse.isClientError()) {
+                    Timber.e("rcv failure repsonse: ${responseBody.string()}")
+                }
+                response
             }
         }
 
