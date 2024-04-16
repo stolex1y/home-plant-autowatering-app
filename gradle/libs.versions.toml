@@ -46,7 +46,7 @@ jdk-desugar = "2.0.4"
 junit = "4.13.2"
 kotlin = "1.9.23"
 kotlinx-immutable = "0.3.5"
-ksp = "1.9.22-1.0.18"
+ksp = "1.9.23-1.0.20"
 maps-compose = "2.5.3"
 material = "1.11.0"
 okhttp = "4.12.0"
@@ -211,3 +211,4 @@ secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugi
 version-catalog-update = { id = "nl.littlerobots.version-catalog-update", version.ref = "version-catalog-update" }
 navigation-safeargs = { id = "androidx.navigation.safeargs", version.ref = "navigation-safeargs" }
 google-gms = { id = "com.google.gms.google-services", version.ref = "gms" }
+parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }

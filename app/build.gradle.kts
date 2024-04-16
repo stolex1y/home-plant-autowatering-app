@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.gms)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.parcelize)
 }
 
 android {
