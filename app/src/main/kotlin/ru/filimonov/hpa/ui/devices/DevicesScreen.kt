@@ -1,6 +1,8 @@
 package ru.filimonov.hpa.ui.devices
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,19 +14,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -36,12 +43,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import ru.filimonov.hpa.R
 import ru.filimonov.hpa.ui.common.navigation.Destination
 import ru.filimonov.hpa.ui.common.udf.SimpleLoadingState
-import ru.filimonov.hpa.ui.devices.model.DeviceCardData
-import ru.filimonov.hpa.ui.devices.model.DeviceWithPlantCardData
-import ru.filimonov.hpa.ui.devices.model.DeviceWithoutPlantCardData
+import ru.filimonov.hpa.ui.device.details.model.Plant
+import ru.filimonov.hpa.ui.devices.model.Device
+import ru.filimonov.hpa.ui.devices.model.DeviceWithPlant
+import ru.filimonov.hpa.ui.devices.model.DeviceWithoutPlant
 import ru.filimonov.hpa.ui.navigation.BottomBarDestination
 import ru.filimonov.hpa.ui.navigation.HpaBottomBar
 import ru.filimonov.hpa.ui.theme.HpaTheme
@@ -49,6 +59,7 @@ import ru.filimonov.hpa.widgets.HpaLoading
 import ru.filimonov.hpa.widgets.HpaScaffold
 import ru.filimonov.hpa.widgets.HpaSnackbarHost
 import ru.filimonov.hpa.widgets.SnackbarState
+import java.net.URI
 import java.util.UUID
 
 @Composable
@@ -85,6 +96,7 @@ fun DevicesScreen(
                         devices = data.devices,
                         modifier = Modifier
                             .fillMaxSize(),
+                        loadPhoto = devicesViewModel::loadDevicePhoto
                     )
                 }
                 snackbarState.replaceSnackbar(messageRes = stateValue.error)
@@ -99,6 +111,7 @@ fun DevicesScreen(
                     devices = data.devices,
                     modifier = Modifier
                         .fillMaxSize(),
+                    loadPhoto = devicesViewModel::loadDevicePhoto
                 )
             }
 
@@ -132,7 +145,8 @@ object DevicesScreenDestination : Destination, BottomBarDestination {
 
 @Composable
 private fun Content(
-    devices: List<DeviceCardData>,
+    devices: List<Device>,
+    loadPhoto: (URI) -> Flow<Bitmap?>,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -154,11 +168,19 @@ private fun Content(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                items(items = devices, key = DeviceCardData::uuid) {
-                    if (it is DeviceWithPlantCardData) {
-                        DeviceWithPlantCard(device = it)
-                    } else if (it is DeviceWithoutPlantCardData) {
-                        DeviceWithoutPlantCard(device = it)
+                items(items = devices, key = Device::uuid) { device ->
+                    val devicePhoto =
+                        if (device.photoUri == null) remember {
+                            mutableStateOf<Bitmap?>(
+                                null
+                            )
+                        } else {
+                            loadPhoto(device.photoUri).collectAsStateWithLifecycle(null)
+                        }
+                    if (device is DeviceWithPlant) {
+                        DeviceWithPlantCard(device = device, devicePhoto = devicePhoto.value)
+                    } else if (device is DeviceWithoutPlant) {
+                        DeviceWithoutPlantCard(device = device, devicePhoto = devicePhoto.value)
                     }
                 }
             }
@@ -179,7 +201,8 @@ private fun Loading() {
 
 @Composable
 private fun DeviceWithPlantCard(
-    device: DeviceWithPlantCardData,
+    device: DeviceWithPlant,
+    devicePhoto: Bitmap?,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -195,24 +218,20 @@ private fun DeviceWithPlantCard(
         ) {
             Text(
                 textAlign = TextAlign.Center,
-                text = device.plantName,
+                text = device.name,
                 minLines = 2,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-            Image(
-                painter = painterResource(id = R.drawable.watering_plant),
-                contentDescription = null,
-                modifier = Modifier.size(width = 100.dp, height = 150.dp),
-                contentScale = ContentScale.FillBounds,
-            )
+            DevicePhoto(bitmap = devicePhoto)
         }
     }
 }
 
 @Composable
 private fun DeviceWithoutPlantCard(
-    device: DeviceWithoutPlantCardData,
+    device: DeviceWithoutPlant,
+    devicePhoto: Bitmap?,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -228,17 +247,12 @@ private fun DeviceWithoutPlantCard(
         ) {
             Text(
                 textAlign = TextAlign.Center,
-                text = stringResource(id = R.string.device_name, device.uuid),
+                text = device.name,
                 minLines = 2,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-            Image(
-                painter = painterResource(id = R.drawable.watering_plant),
-                contentDescription = null,
-                modifier = Modifier.size(width = 100.dp, height = 150.dp),
-                contentScale = ContentScale.FillBounds,
-            )
+            DevicePhoto(bitmap = devicePhoto)
         }
     }
 }
@@ -258,35 +272,78 @@ private fun AddDeviceButton(
 }
 
 @Composable
+private fun DevicePhoto(
+    bitmap: Bitmap?,
+) {
+    val modifier = Modifier
+        .height(150.dp)
+        .clip(MaterialTheme.shapes.small)
+    if (bitmap == null) {
+        Image(
+            painter = painterResource(id = R.drawable.watering_plant),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = modifier,
+        )
+    } else {
+        Image(
+            bitmap = bitmap.asImageBitmap(),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
 @Preview(showBackground = true, showSystemUi = true)
 private fun ContentPreview() {
     HpaTheme {
         Content(
+            loadPhoto = { emptyFlow() },
             devices = listOf(
-                DeviceWithPlantCardData(
-                    deviceId = UUID.randomUUID(),
-                    plantId = UUID.randomUUID(),
-                    plantName = "Хлорофитум 1",
+                DeviceWithPlant(
+                    uuid = UUID.randomUUID(),
+                    plant = Plant(
+                        uuid = UUID.randomUUID(),
+                        name = "Хлорофитум 1",
+                    ),
+                    name = "Хлорофитум на кухне",
+                    photoUri = null,
                 ),
-                DeviceWithPlantCardData(
-                    deviceId = UUID.randomUUID(),
-                    plantId = UUID.randomUUID(),
-                    plantName = "Хлорофитум обыкновенный 2",
+                DeviceWithPlant(
+                    uuid = UUID.randomUUID(),
+                    plant = Plant(
+                        uuid = UUID.randomUUID(),
+                        name = "Хлорофитум необыкновенный 243",
+                    ),
+                    name = "Хлорофитум в комнате",
+                    photoUri = null,
                 ),
-                DeviceWithoutPlantCardData(
-                    deviceId = UUID.randomUUID(),
+                DeviceWithoutPlant(
+                    uuid = UUID.randomUUID(),
+                    name = "asdfjwqjid",
+                    photoUri = null,
                 ),
-                DeviceWithoutPlantCardData(
-                    deviceId = UUID.randomUUID(),
+                DeviceWithoutPlant(
+                    uuid = UUID.randomUUID(),
+                    name = "asdfjwqjid",
+                    photoUri = null,
                 ),
-                DeviceWithoutPlantCardData(
-                    deviceId = UUID.randomUUID(),
+                DeviceWithoutPlant(
+                    uuid = UUID.randomUUID(),
+                    name = "asdfjwqjid",
+                    photoUri = null,
                 ),
-                DeviceWithoutPlantCardData(
-                    deviceId = UUID.randomUUID(),
+                DeviceWithoutPlant(
+                    uuid = UUID.randomUUID(),
+                    name = "asdfjwqjid",
+                    photoUri = null,
                 ),
-                DeviceWithoutPlantCardData(
-                    deviceId = UUID.randomUUID(),
+                DeviceWithoutPlant(
+                    uuid = UUID.randomUUID(),
+                    name = "asdfjwqjid",
+                    photoUri = null,
                 )
             )
         )
@@ -298,7 +355,8 @@ private fun ContentPreview() {
 private fun EmptyContentPreview() {
     HpaTheme {
         Content(
-            emptyList()
+            loadPhoto = { emptyFlow() },
+            devices = emptyList(),
         )
     }
 }
@@ -308,10 +366,15 @@ private fun EmptyContentPreview() {
 private fun DeviceWithPlantCardPreview() {
     HpaTheme {
         DeviceWithPlantCard(
-            DeviceWithPlantCardData(
-                deviceId = UUID.randomUUID(),
-                plantId = UUID.randomUUID(),
-                plantName = "Хлорофитум",
+            devicePhoto = null,
+            device = DeviceWithPlant(
+                uuid = UUID.randomUUID(),
+                plant = Plant(
+                    name = "Хлорофитум",
+                    uuid = UUID.randomUUID(),
+                ),
+                name = "Хлорофитум",
+                photoUri = null,
             )
         )
     }
@@ -322,8 +385,11 @@ private fun DeviceWithPlantCardPreview() {
 private fun DeviceWithoutPlantCardPreview() {
     HpaTheme {
         DeviceWithoutPlantCard(
-            DeviceWithoutPlantCardData(
-                deviceId = UUID.randomUUID(),
+            devicePhoto = null,
+            device = DeviceWithoutPlant(
+                uuid = UUID.randomUUID(),
+                name = "Хлорофитум",
+                photoUri = null,
             )
         )
     }

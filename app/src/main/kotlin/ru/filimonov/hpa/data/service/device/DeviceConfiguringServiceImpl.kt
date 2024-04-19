@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import ru.filimonov.hpa.common.coroutine.CoroutineNames
-import ru.filimonov.hpa.common.coroutine.FlowExtensions.makeSyncFlow
+import ru.filimonov.hpa.common.coroutine.FlowExtensions.makeSyncFlowCatching
 import ru.filimonov.hpa.data.remote.mapExceptionToDomain
 import ru.filimonov.hpa.data.remote.mapLatestResultExceptionToDomain
 import ru.filimonov.hpa.data.remote.repository.DeviceConfigurationRemoteRepository
@@ -23,7 +23,7 @@ class DeviceConfiguringServiceImpl @Inject constructor(
     @Named(CoroutineNames.IO_DISPATCHER) private val dispatcher: CoroutineDispatcher,
 ) : DeviceConfiguringService {
     override fun getDeviceInfo(): Flow<Result<DomainDeviceInfo>> =
-        makeSyncFlow(retryDelay = 10.seconds, syncDelay = Int.MAX_VALUE.seconds) {
+        makeSyncFlowCatching(retryDelay = 10.seconds, syncDelay = Int.MAX_VALUE.seconds) {
             remoteRepository.getInfo()
         }
             .mapLatestResultExceptionToDomain()

@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import ru.filimonov.hpa.common.coroutine.CoroutineNames
-import ru.filimonov.hpa.common.coroutine.FlowExtensions.makeSyncFlow
+import ru.filimonov.hpa.common.coroutine.FlowExtensions.makeSyncFlowCatching
 import ru.filimonov.hpa.data.remote.mapExceptionToDomain
 import ru.filimonov.hpa.data.remote.mapLatestResultExceptionToDomain
 import ru.filimonov.hpa.data.remote.model.plant.PlantResponse
@@ -26,15 +26,16 @@ class PlantServiceImpl @Inject constructor(
     private val plantRemoteRepository: PlantRemoteRepository,
     @Named(CoroutineNames.IO_DISPATCHER) private val dispatcher: CoroutineDispatcher,
 ) : PlantService {
-    override fun getAllInList(ids: List<UUID>): Flow<Result<List<DomainPlant>>> = makeSyncFlow {
-        plantRemoteRepository.getAllInList(ids)
-            .map(PlantResponse::toDomain)
-    }
-        .onStart { Timber.d("start getting plants by ids") }
-        .distinctUntilChanged()
-        .onEach { Timber.v("get new plants by ids") }
-        .mapLatestResultExceptionToDomain()
-        .flowOn(dispatcher)
+    override fun getAllInList(ids: List<UUID>): Flow<Result<List<DomainPlant>>> =
+        makeSyncFlowCatching {
+            plantRemoteRepository.getAllInList(ids)
+                .map(PlantResponse::toDomain)
+        }
+            .onStart { Timber.d("start getting plants by ids") }
+            .distinctUntilChanged()
+            .onEach { Timber.v("get new plants by ids") }
+            .mapLatestResultExceptionToDomain()
+            .flowOn(dispatcher)
 
     override suspend fun add(plant: DomainPlant): Result<DomainPlant> = runCatching {
         withContext(dispatcher) {

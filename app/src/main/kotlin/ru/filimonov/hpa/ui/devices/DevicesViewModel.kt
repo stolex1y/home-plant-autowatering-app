@@ -1,11 +1,13 @@
 package ru.filimonov.hpa.ui.devices
 
+import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
 import androidx.work.WorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import ru.filimonov.hpa.common.coroutine.CoroutineNames.APPLICATION_SCOPE
 import ru.filimonov.hpa.common.coroutine.CoroutineNames.DEFAULT_DISPATCHER
@@ -18,9 +20,9 @@ import ru.filimonov.hpa.ui.common.udf.AbstractViewModel
 import ru.filimonov.hpa.ui.common.udf.IData
 import ru.filimonov.hpa.ui.common.udf.IEvent
 import ru.filimonov.hpa.ui.common.udf.SimpleLoadingState
-import ru.filimonov.hpa.ui.devices.model.DeviceCardData
-import ru.filimonov.hpa.ui.devices.model.DeviceWithPlantCardData
-import ru.filimonov.hpa.ui.devices.model.DeviceWithoutPlantCardData
+import ru.filimonov.hpa.ui.devices.model.Device
+import ru.filimonov.hpa.ui.devices.model.Device.Companion.toDevice
+import java.net.URI
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -40,6 +42,10 @@ class DevicesViewModel @Inject constructor(
     workManager = workManager,
 ) {
 
+    fun loadDevicePhoto(uri: URI): Flow<Bitmap?> {
+        return deviceService.getPhoto(uri).handleError()
+    }
+
     override fun dispatchEvent(event: Event) {
         when (event) {
             Event.Reload -> reloadData()
@@ -48,27 +54,21 @@ class DevicesViewModel @Inject constructor(
 
     override fun loadData(): Flow<Result<Data>> {
         return deviceService.getAll()
-            .flatMapLatestResult { devices ->
-                val plantsFlow =
-                    plantService.getAllInList(devices.map { device -> device.uuid })
-                        .mapLatestResult { plants -> plants.associateBy(DomainPlant::uuid) }
-                plantsFlow.mapLatestResult { plants ->
-                    Data(devices = devices.map { device ->
-                        val plantId = device.plantId
-                        if (plantId != null && plants[plantId] != null) {
-                            DeviceWithPlantCardData(
-                                deviceId = device.uuid,
-                                plantId = plantId,
-                                plantName = plants[plantId]!!.name,
-                            )
-                        } else {
-                            DeviceWithoutPlantCardData(
-                                deviceId = device.uuid,
-                            )
-                        }
-                    })
-                }
-            }.flowOn(defaultDispatcher)
+            .flatMapLatestResult { domainDevices ->
+                plantService
+                    .getAllInList(domainDevices.map { domainDevice -> domainDevice.uuid })
+                    .mapLatestResult { domainPlants ->
+                        domainPlants.associateBy(DomainPlant::uuid)
+                    }
+                    .mapLatestResult { plants ->
+                        Data(devices = domainDevices.map { domainDevice ->
+                            val plant = domainDevice.plantId?.run(plants::get)
+                            domainDevice.toDevice(plant)
+                        })
+                    }
+            }
+            .distinctUntilChanged()
+            .flowOn(defaultDispatcher)
     }
 
     sealed interface Event : IEvent {
@@ -76,6 +76,6 @@ class DevicesViewModel @Inject constructor(
     }
 
     data class Data(
-        val devices: List<DeviceCardData> = emptyList()
+        val devices: List<Device> = emptyList()
     ) : IData
 }

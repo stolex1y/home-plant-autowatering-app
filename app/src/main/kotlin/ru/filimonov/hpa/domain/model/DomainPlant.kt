@@ -1,11 +1,12 @@
 package ru.filimonov.hpa.domain.model
 
+import java.net.URI
 import java.util.UUID
 
 data class DomainPlant(
     val uuid: UUID,
     val name: String,
-    val photo: UUID?,
+    val photoUri: URI?,
     val airTempMin: Float?,
     val airTempMax: Float?,
     val airHumidityMin: Float?,

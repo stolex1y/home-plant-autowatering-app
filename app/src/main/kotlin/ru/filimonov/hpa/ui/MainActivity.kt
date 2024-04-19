@@ -15,7 +15,6 @@ import ru.filimonov.hpa.ui.auth.signin.SignInScreen
 import ru.filimonov.hpa.ui.auth.signout.addSignOutScreen
 import ru.filimonov.hpa.ui.device.adding.DeviceAddingScreenDestination
 import ru.filimonov.hpa.ui.device.adding.addDeviceAddingScreen
-import ru.filimonov.hpa.ui.device.configuring.addDeviceConfiguringScreen
 import ru.filimonov.hpa.ui.device.details.DeviceDetailsScreenDestination
 import ru.filimonov.hpa.ui.device.details.addDeviceDetailsScreen
 import ru.filimonov.hpa.ui.device.sensors.addSoilMoistureChartScreen
@@ -71,7 +70,6 @@ private fun NavGraphBuilder.navGraph(
         onAdding = { uuid -> navController.navigateTo(DeviceDetailsScreenDestination(uuid)) },
         onCancel = navController::navigateUp
     )
-    addDeviceConfiguringScreen(onNavigateUp = navController::navigateUp)
     addDeviceDetailsScreen()
 
     addSoilMoistureChartScreen(onNavigateUp = navController::navigateUp)

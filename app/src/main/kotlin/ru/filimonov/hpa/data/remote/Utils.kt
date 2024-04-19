@@ -11,6 +11,7 @@ import ru.filimonov.hpa.domain.errors.BadRequestException
 import ru.filimonov.hpa.domain.errors.NotAuthenticatedException
 import ru.filimonov.hpa.domain.errors.UnknownException
 import ru.filimonov.hpa.domain.errors.UnknownServerErrorException
+import timber.log.Timber
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 
@@ -26,12 +27,20 @@ fun HttpException.isOk(): Boolean {
     return code() / 100 == 2
 }
 
+fun HttpException.isNotFound(): Boolean {
+    return code() == 404
+}
+
+fun coil.network.HttpException.isNotFound(): Boolean {
+    return response.code == 404
+}
+
 fun Response.isClientError(): Boolean {
-    return code() / 100 == 4
+    return code / 100 == 4
 }
 
 fun Response.isServerError(): Boolean {
-    return code() / 100 == 5
+    return code / 100 == 5
 }
 
 fun Throwable.mapToDomain(): Throwable {
@@ -51,6 +60,7 @@ fun Throwable.mapToDomain(): Throwable {
 
         is SocketTimeoutException, is ConnectException -> return ServerIsNotAvailableException(this)
     }
+    Timber.e(this, "map exception to domain unknown exception")
     return UnknownException(this)
 }
 

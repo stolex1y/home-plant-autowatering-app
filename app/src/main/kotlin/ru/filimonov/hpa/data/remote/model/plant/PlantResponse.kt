@@ -1,12 +1,13 @@
 package ru.filimonov.hpa.data.remote.model.plant
 
 import ru.filimonov.hpa.domain.model.DomainPlant
+import java.net.URI
 import java.util.UUID
 
 data class PlantResponse(
     val uuid: UUID,
     val name: String,
-    val photo: UUID?,
+    val photo: URI?,
     val airTempMin: Float?,
     val airTempMax: Float?,
     val airHumidityMin: Float?,
@@ -19,7 +20,7 @@ data class PlantResponse(
     fun toDomain() = DomainPlant(
         uuid = uuid,
         name = name,
-        photo = photo,
+        photoUri = photo,
         airTempMin = airTempMin,
         airTempMax = airTempMax,
         airHumidityMin = airHumidityMin,

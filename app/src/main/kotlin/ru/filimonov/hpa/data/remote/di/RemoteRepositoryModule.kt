@@ -71,10 +71,10 @@ internal interface RemoteRepositoryModule {
         @JvmSuppressWildcards
         fun logInterceptor(): Interceptor {
             return Interceptor { chain ->
-                Timber.d("make request to ${chain.request().url()}")
+                Timber.d("make request to ${chain.request().url}")
                 val response = chain.proceed(chain.request())
-                val networkResponse = response.networkResponse()
-                val responseBody = networkResponse?.body()
+                val networkResponse = response.networkResponse
+                val responseBody = networkResponse?.body
                 if (responseBody != null && networkResponse.isClientError()) {
                     Timber.e("rcv failure repsonse: ${responseBody.string()}")
                 }
@@ -94,7 +94,7 @@ internal interface RemoteRepositoryModule {
                     val idToken = userAuthService.get().getIdToken().first()
                     val requestBuilder = chain.request()
                         .newBuilder()
-                        .url(chain.request().url())
+                        .url(chain.request().url)
 
                     if (idToken != null) {
                         requestBuilder.addHeader(BuildConfig.API_AUTH_HEADER, "Bearer $idToken")
@@ -119,7 +119,7 @@ internal interface RemoteRepositoryModule {
                         idToken =
                             userAuthService.get().getIdToken().first() ?: return@runBlocking null
                     }
-                    response.request().newBuilder()
+                    response.request.newBuilder()
                         .addHeader(BuildConfig.API_AUTH_HEADER, "Bearer $idToken")
                         .build()
                 }
@@ -144,7 +144,7 @@ internal interface RemoteRepositoryModule {
 
         @Provides
         @Singleton
-        fun backend_retrofit(
+        fun backendRetrofit(
             httpClient: OkHttpClient,
             gson: Gson,
         ): Retrofit {
@@ -158,7 +158,7 @@ internal interface RemoteRepositoryModule {
         @Provides
         @Singleton
         @Named(DEVICE_RETROFIT)
-        fun device_retrofit(
+        fun deviceRetrofit(
             httpClient: OkHttpClient,
             gson: Gson,
         ): Retrofit {
