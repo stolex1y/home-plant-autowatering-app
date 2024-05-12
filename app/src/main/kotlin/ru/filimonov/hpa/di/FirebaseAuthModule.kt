@@ -1,4 +1,4 @@
-package ru.filimonov.hpa.auth.di
+package ru.filimonov.hpa.di
 
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth

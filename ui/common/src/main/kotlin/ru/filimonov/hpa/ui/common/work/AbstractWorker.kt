@@ -31,7 +31,7 @@ abstract class AbstractWorker<Input : Any, Output> protected constructor(
         action(inputArg).onFailure {
             if (it is WorkErrorWrapper) {
                 Timber.e("'$workName' finished with work error: ${it.workError.name}")
-                result = Result.failure(WorkUtils.serialize(it))
+                result = Result.failure(WorkUtils.serialize(it.workError))
             } else {
                 val unknownWorkError = WorkError.UnknownWorkError
                 Timber.e(it, "'$workName' finished with unknown error")

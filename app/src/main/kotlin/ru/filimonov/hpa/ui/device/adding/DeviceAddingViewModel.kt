@@ -13,7 +13,7 @@ import ru.filimonov.hpa.domain.service.device.DeviceConfiguringService
 import ru.filimonov.hpa.ui.common.udf.AbstractViewModel
 import ru.filimonov.hpa.ui.common.udf.IData
 import ru.filimonov.hpa.ui.common.udf.IEvent
-import ru.filimonov.hpa.ui.common.udf.IState
+import ru.filimonov.hpa.ui.common.udf.IUiState
 import ru.filimonov.hpa.ui.common.work.WorkError
 import ru.filimonov.hpa.ui.common.work.WorkUtils.deserialize
 import ru.filimonov.hpa.ui.device.adding.model.AddingDevice
@@ -29,9 +29,9 @@ class DeviceAddingViewModel @Inject constructor(
     private val deviceConfigurationService: DeviceConfiguringService,
     @Named(CoroutineNames.APPLICATION_SCOPE) applicationScope: CoroutineScope,
     workManager: Provider<WorkManager>,
-) : AbstractViewModel<DeviceAddingViewModel.Event, DeviceAddingViewModel.Data, DeviceAddingViewModel.State>(
+) : AbstractViewModel<DeviceAddingViewModel.Event, DeviceAddingViewModel.Data, DeviceAddingViewModel.UiState>(
     initData = Data.Empty,
-    stateFactory = State.factory,
+    stateFactory = UiState.factory,
     applicationScope = applicationScope,
     workManager = workManager,
 ) {
@@ -50,8 +50,8 @@ class DeviceAddingViewModel @Inject constructor(
                     name = domainDeviceInfo.mac,
                 )
             ),
-            loadingState = State.Adding,
-            finishState = { State.Added(it.outputData.deserialize(UUID::class)!!) },
+            loadingState = UiState.Adding,
+            finishState = { UiState.Added(it.outputData.deserialize(UUID::class)!!) },
         )
     }
 
@@ -77,22 +77,22 @@ class DeviceAddingViewModel @Inject constructor(
         return super.parseWorkError(workError)
     }
 
-    sealed interface State : IState {
-        data object Initial : State
-        data object Loading : State
-        data object Loaded : State
-        data class Error(@StringRes val error: Int) : State
-        data object Adding : State
-        data class Added(val addedDeviceId: UUID) : State
+    sealed interface UiState : IUiState {
+        data object Initial : UiState
+        data object Loading : UiState
+        data object Loaded : UiState
+        data class Error(@StringRes val error: Int) : UiState
+        data object Adding : UiState
+        data class Added(val addedDeviceId: UUID) : UiState
 
         companion object {
-            val factory = object : IState.Factory<State> {
-                override val initState: State = Initial
-                override val loadingState: State = Loading
-                override val loadedState: State = Loaded
+            val factory = object : IUiState.Factory<UiState> {
+                override val initState: UiState = Initial
+                override val loadingState: UiState = Loading
+                override val loadedState: UiState = Loaded
 
-                override fun errorState(@StringRes error: Int): State = Error(error)
-                override fun isError(state: State): Boolean = state is Error
+                override fun errorState(@StringRes error: Int): UiState = Error(error)
+                override fun isError(state: UiState): Boolean = state is Error
             }
         }
     }

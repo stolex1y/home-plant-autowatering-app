@@ -113,6 +113,9 @@ dependencies {
 
     implementation(libs.gson)
 
+    implementation(libs.coil.kt.compose)
+    implementation(libs.zelory.compressor)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

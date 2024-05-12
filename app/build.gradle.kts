@@ -138,6 +138,9 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter)
 
+    implementation(libs.coil.kt.compose)
+    implementation(libs.zelory.compressor)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

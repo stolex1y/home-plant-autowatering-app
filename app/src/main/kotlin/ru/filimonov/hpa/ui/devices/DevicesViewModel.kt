@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOn
 import ru.filimonov.hpa.common.coroutine.CoroutineNames.APPLICATION_SCOPE
 import ru.filimonov.hpa.common.coroutine.CoroutineNames.DEFAULT_DISPATCHER
@@ -19,7 +20,7 @@ import ru.filimonov.hpa.domain.service.device.DeviceService
 import ru.filimonov.hpa.ui.common.udf.AbstractViewModel
 import ru.filimonov.hpa.ui.common.udf.IData
 import ru.filimonov.hpa.ui.common.udf.IEvent
-import ru.filimonov.hpa.ui.common.udf.SimpleLoadingState
+import ru.filimonov.hpa.ui.common.udf.SimpleLoadingUiState
 import ru.filimonov.hpa.ui.devices.model.Device
 import ru.filimonov.hpa.ui.devices.model.Device.Companion.toDevice
 import java.net.URI
@@ -35,14 +36,17 @@ class DevicesViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     @Named(APPLICATION_SCOPE) applicationScope: CoroutineScope,
     workManager: Provider<WorkManager>,
-) : AbstractViewModel<DevicesViewModel.Event, DevicesViewModel.Data, SimpleLoadingState>(
+) : AbstractViewModel<DevicesViewModel.Event, DevicesViewModel.Data, SimpleLoadingUiState>(
     initData = Data(),
-    stateFactory = SimpleLoadingState.factory,
+    stateFactory = SimpleLoadingUiState.factory,
     applicationScope = applicationScope,
     workManager = workManager,
 ) {
 
-    fun loadDevicePhoto(uri: URI): Flow<Bitmap?> {
+    fun loadDevicePhoto(uri: URI?): Flow<Bitmap?> {
+        if (uri == null) {
+            return emptyFlow()
+        }
         return deviceService.getPhoto(uri).handleError()
     }
 

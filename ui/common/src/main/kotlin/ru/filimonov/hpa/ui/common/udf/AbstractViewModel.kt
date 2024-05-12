@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
@@ -31,9 +32,9 @@ import timber.log.Timber
 import javax.inject.Named
 import javax.inject.Provider
 
-abstract class AbstractViewModel<E : IEvent, D : IData, S : IState>(
+abstract class AbstractViewModel<E : IEvent, D : IData, S : IUiState>(
     private val initData: D,
-    private val stateFactory: IState.Factory<S>,
+    private val stateFactory: IUiState.Factory<S>,
     @Named(APPLICATION_SCOPE) protected val applicationScope: CoroutineScope,
     private val workManager: Provider<WorkManager>,
 ) : ViewModel() {
@@ -83,7 +84,7 @@ abstract class AbstractViewModel<E : IEvent, D : IData, S : IState>(
         _state.value = state
     }
 
-    protected fun updateState(error: Throwable) {
+    protected open fun updateState(error: Throwable) {
         Timber.e(error, "Updated state with error:")
         setErrorStateWith(parseError(error))
     }
@@ -125,6 +126,16 @@ abstract class AbstractViewModel<E : IEvent, D : IData, S : IState>(
         }
     }
 
+    protected fun <T> Flow<Result<T>>.handleError(): Flow<T> {
+        return this.mapNotNull {
+            if (it.isFailure) {
+                Timber.e(it.exceptionOrNull()!!, "error in flow")
+                updateState(it.exceptionOrNull()!!)
+            }
+            it.getOrNull()
+        }
+    }
+
     private fun setErrorStateWith(@StringRes errorMsg: Int) {
         updateState(stateFactory.errorState(errorMsg))
     }
@@ -136,11 +147,11 @@ abstract class AbstractViewModel<E : IEvent, D : IData, S : IState>(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun initDataLoading(): StateFlow<D> {
-        return reloadEvent.consumeAsFlow().flatMapLatest {
+        return reloadEvent.receiveAsFlow().flatMapLatest {
+            Timber.d("reload data in ${this::class.simpleName}")
             loadData()
         }
             .handleError()
-            .mapNotNull { it.getOrNull() }
             .onEach {
                 if (_state.value == stateFactory.initState || stateFactory.isError(_state.value)) {
                     _state.value = stateFactory.loadedState
@@ -151,14 +162,5 @@ abstract class AbstractViewModel<E : IEvent, D : IData, S : IState>(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = initData
             )
-    }
-
-    private fun <T> Flow<Result<T>>.handleError(): Flow<Result<T>> {
-        return this.onEach {
-            if (it.isFailure) {
-                Timber.e(it.exceptionOrNull()!!, "error in flow")
-                updateState(it.exceptionOrNull()!!)
-            }
-        }
     }
 }

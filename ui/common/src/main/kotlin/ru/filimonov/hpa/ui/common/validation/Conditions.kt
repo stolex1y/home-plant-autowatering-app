@@ -11,17 +11,19 @@ object Conditions {
         }
     }
 
-    class RequiredField<T : CharSequence>(@StringRes private val errorStringRes: Int) :
+    class RequiredField<T>(@StringRes private val errorStringRes: Int) :
         Condition<T>, Serializable {
         override fun validate(value: T): ValidationResult {
-            return if (value.isBlank()) {
-                ValidationResult.invalid(errorStringRes)
-            } else {
-                ValidationResult.valid()
+            if (value == null)
+                return ValidationResult.invalid(errorStringRes)
+
+            if (value is CharSequence && value.isBlank()) {
+                return ValidationResult.invalid(errorStringRes)
+
             }
+            return ValidationResult.valid()
         }
     }
-
 
     class TextMaxLength<T : CharSequence?>(
         val maxLength: Int,
@@ -101,6 +103,50 @@ object Conditions {
             } else {
                 ValidationResult.invalid(errorStringRes)
             }
+        }
+    }
+
+    class FloatInRange(
+        private val range: ClosedRange<Float>,
+        @StringRes private val errorStringRes: Int
+    ) :
+        Condition<String>, Serializable {
+
+        private val invalidResult = ValidationResult.invalid(
+            errorStringRes,
+            range.start,
+            range.endInclusive,
+        )
+
+        override fun validate(value: String): ValidationResult {
+            val parsed = value.toFloatOrNull() ?: return invalidResult
+
+            if (parsed !in range) {
+                return invalidResult
+            }
+            return ValidationResult.valid()
+        }
+    }
+
+    class IntInRange(
+        private val range: ClosedRange<Int>,
+        @StringRes private val errorStringRes: Int
+    ) :
+        Condition<String>, Serializable {
+
+        private val invalidResult = ValidationResult.invalid(
+            errorStringRes,
+            range.start,
+            range.endInclusive,
+        )
+
+        override fun validate(value: String): ValidationResult {
+            val parsed = value.toIntOrNull() ?: return invalidResult
+
+            if (parsed !in range) {
+                return invalidResult
+            }
+            return ValidationResult.valid()
         }
     }
 

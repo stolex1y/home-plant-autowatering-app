@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import ru.filimonov.hpa.common.coroutine.CoroutineNames
 import ru.filimonov.hpa.domain.model.DomainUserAccount
 import ru.filimonov.hpa.domain.service.auth.UserAuthService
-import ru.filimonov.hpa.ui.common.udf.IState
+import ru.filimonov.hpa.ui.common.udf.IUiState
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -25,13 +25,13 @@ class AuthViewModel @Inject constructor(
     private val userAuthService: UserAuthService,
 ) : ViewModel() {
 
-    private val _state: MutableStateFlow<State> =
-        MutableStateFlow(State.Loading)
-    val state: StateFlow<State> = _state.asStateFlow()
+    private val _state: MutableStateFlow<UiState> =
+        MutableStateFlow(UiState.Loading)
+    val state: StateFlow<UiState> = _state.asStateFlow()
 
     fun onStartSigningIn() {
         viewModelScope.launch {
-            _state.value = State.SigningIn
+            _state.value = UiState.SigningIn
         }
     }
 
@@ -39,9 +39,9 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             val userAccount = userAuthService.getUserAccount()
             if (userAccount == null) {
-                _state.value = State.Expired
+                _state.value = UiState.Expired
             } else {
-                _state.value = State.SignedIn(userAccount)
+                _state.value = UiState.SignedIn(userAccount)
             }
         }
     }
@@ -50,14 +50,14 @@ class AuthViewModel @Inject constructor(
         applicationScope.launch(coroutineDispatcher) {
             userAuthService.authenticate(authCredential = authCredential)
                 .onFailure {
-                    _state.value = State.SignedOut
+                    _state.value = UiState.SignedOut
                 }.onSuccess {
                     val userAccount = userAuthService.getUserAccount()
                     if (userAccount == null) {
                         _state.value =
-                            State.Error(ru.filimonov.hpa.ui.common.R.string.internal_error)
+                            UiState.Error(ru.filimonov.hpa.ui.common.R.string.internal_error)
                     } else {
-                        _state.value = State.SignedIn(userAccount)
+                        _state.value = UiState.SignedIn(userAccount)
                     }
                 }
         }
@@ -66,19 +66,19 @@ class AuthViewModel @Inject constructor(
     fun signOut() {
         viewModelScope.launch {
             userAuthService.cleanSession()
-            _state.value = State.SignedOut
+            _state.value = UiState.SignedOut
         }
     }
 
-    sealed interface State : IState {
-        data object Loading : State
-        data object SigningIn : State
+    sealed interface UiState : IUiState {
+        data object Loading : UiState
+        data object SigningIn : UiState
         data class SignedIn(
             val userAccount: DomainUserAccount
-        ) : State
+        ) : UiState
 
-        data object Expired : State
-        data object SignedOut : State
-        data class Error(@StringRes val msg: Int) : State
+        data object Expired : UiState
+        data object SignedOut : UiState
+        data class Error(@StringRes val msg: Int) : UiState
     }
 }

@@ -9,6 +9,7 @@ import ru.filimonov.hpa.common.exception.ServerIsNotAvailableException
 import ru.filimonov.hpa.common.utils.mapException
 import ru.filimonov.hpa.domain.errors.BadRequestException
 import ru.filimonov.hpa.domain.errors.NotAuthenticatedException
+import ru.filimonov.hpa.domain.errors.NotFoundException
 import ru.filimonov.hpa.domain.errors.UnknownException
 import ru.filimonov.hpa.domain.errors.UnknownServerErrorException
 import timber.log.Timber
@@ -31,6 +32,10 @@ fun HttpException.isNotFound(): Boolean {
     return code() == 404
 }
 
+fun coil.network.HttpException.isNotModified(): Boolean {
+    return response.code == 304
+}
+
 fun coil.network.HttpException.isNotFound(): Boolean {
     return response.code == 404
 }
@@ -43,13 +48,20 @@ fun Response.isServerError(): Boolean {
     return code / 100 == 5
 }
 
+fun Response.isNotModified(): Boolean {
+    return code == 304
+}
+
 fun Throwable.mapToDomain(): Throwable {
     when (this) {
         is HttpException -> {
+            Timber.e(this, "map to http exception with body: ${this.response()?.body()}")
             when {
                 isClientError() -> {
                     return if (code() == 401 || code() == 403)
                         NotAuthenticatedException(this)
+                    else if (code() == 404)
+                        NotFoundException(this)
                     else
                         BadRequestException(this)
                 }

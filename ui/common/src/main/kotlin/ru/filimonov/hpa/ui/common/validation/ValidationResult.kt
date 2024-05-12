@@ -9,7 +9,7 @@ interface ValidationResult {
 
     val errorMessageRes: Int?
 
-    val errorMessageArgs: Array<out Any>?
+    val errorMessageArgs: Array<out Any>
 
     companion object {
         fun create(
@@ -31,14 +31,14 @@ interface ValidationResult {
                 override val errorMessageRes: Int?
                     get() = null
 
-                override val errorMessageArgs: Array<Any>?
-                    get() = null
+                override val errorMessageArgs: Array<Any>
+                    get() = emptyArray()
             }
         }
 
         fun invalid(
             @StringRes errorMessageRes: Int,
-            errorMessageArgs: Array<out Any>? = null
+            vararg errorMessageArgs: Any,
         ): ValidationResult {
             return object : ValidationResult {
                 override val isValid: Boolean
@@ -46,7 +46,7 @@ interface ValidationResult {
                 override val errorMessageRes: Int
                     get() = errorMessageRes
 
-                override val errorMessageArgs: Array<out Any>?
+                override val errorMessageArgs: Array<out Any>
                     get() = errorMessageArgs
             }
         }

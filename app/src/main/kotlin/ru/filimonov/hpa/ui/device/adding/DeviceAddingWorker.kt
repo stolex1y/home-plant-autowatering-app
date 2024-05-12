@@ -6,8 +6,12 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeout
 import ru.filimonov.hpa.BuildConfig
 import ru.filimonov.hpa.R
+import ru.filimonov.hpa.common.coroutine.FlowExtensions.filterResult
 import ru.filimonov.hpa.domain.errors.BadRequestException
 import ru.filimonov.hpa.domain.model.device.DomainDevice
 import ru.filimonov.hpa.domain.model.device.DomainDeviceConfiguration
@@ -18,8 +22,8 @@ import ru.filimonov.hpa.ui.common.work.AbstractWorker
 import ru.filimonov.hpa.ui.common.work.WorkErrorWrapper
 import ru.filimonov.hpa.ui.device.adding.model.AddingDevice
 import ru.filimonov.hpa.ui.device.adding.model.AddingErrors
-import java.net.URL
 import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 
 @HiltWorker
 class DeviceAddingWorker @AssistedInject constructor(
@@ -36,33 +40,51 @@ class DeviceAddingWorker @AssistedInject constructor(
     workerParams
 ) {
     override suspend fun action(input: AddingDevice): kotlin.Result<UUID> {
-        deviceService.add(
-            DomainDevice(
-                mac = input.mac,
-                name = input.name,
-            )
-        ).onSuccess { addedDevice ->
-            deviceConfiguringService.sendConfiguration(
-                DomainDeviceConfiguration(
-                    ssid = input.ssid,
-                    pass = input.pass,
-                    deviceId = addedDevice.uuid,
-                    serverUrl = URL(BuildConfig.DEVICE_BASE_URL)
+        try {
+            val addedDevice = deviceService.add(
+                DomainDevice(
+                    mac = input.mac,
+                    name = input.name,
                 )
-            ).onSuccess {
+            ).getOrThrow()
+            try {
+                val config = DomainDeviceConfiguration(
+                    wifiSsid = input.ssid,
+                    wifiPass = input.pass,
+                    deviceId = addedDevice.uuid,
+                    mqttUrl = BuildConfig.MQTT_URL,
+                    mqttUsername = BuildConfig.MQTT_DEVICE_USERNAME,
+                    mqttPassword = BuildConfig.MQTT_DEVICE_PASSWORD,
+                )
+                sendConfigAndSwitchMode(config = config).getOrThrow()
                 return kotlin.Result.success(addedDevice.uuid)
-            }.onFailure {
+            } catch (t: Throwable) {
                 deviceService.delete(addedDevice.uuid)
-                return kotlin.Result.failure(WorkErrorWrapper(AddingErrors.InvalidDeviceConfigurationError))
+                return kotlin.Result.failure(t)
             }
-        }.onFailure {
-            return if (it is BadRequestException) {
+        } catch (t: Throwable) {
+            return if (t is BadRequestException) {
                 kotlin.Result.failure(WorkErrorWrapper(AddingErrors.DeviceAlreadyAddedError))
             } else {
-                kotlin.Result.failure(it)
+                kotlin.Result.failure(t)
             }
         }
-        return kotlin.Result.failure(IllegalStateException())
+    }
+
+    private suspend fun sendConfigAndSwitchMode(config: DomainDeviceConfiguration): kotlin.Result<Unit> {
+        return kotlin.runCatching {
+            deviceConfiguringService.sendConfiguration(deviceConfiguration = config).getOrThrow()
+            try {
+                withTimeout(timeout = 30.seconds) {
+                    deviceConfiguringService.isConnected()
+                        .filterResult { it }
+                        .first()
+                        .getOrThrow()
+                }
+            } catch (e: TimeoutCancellationException) {
+                throw WorkErrorWrapper(AddingErrors.InvalidDeviceConfigurationError)
+            }
+        }
     }
 
     companion object {

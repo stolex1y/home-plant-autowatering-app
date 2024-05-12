@@ -9,7 +9,6 @@ data class AddPlantRequest(
     val airHumidityMin: Float?,
     val airHumidityMax: Float?,
     val soilMoistureMin: Float?,
-    val soilMoistureMax: Float?,
     val lightLuxMax: Int?,
     val lightLuxMin: Int?,
 )
@@ -21,7 +20,6 @@ fun DomainPlant.toAddPlantRequest() = AddPlantRequest(
     airHumidityMin = airHumidityMin,
     airHumidityMax = airHumidityMax,
     soilMoistureMin = soilMoistureMin,
-    soilMoistureMax = soilMoistureMax,
     lightLuxMax = lightLuxMax,
     lightLuxMin = lightLuxMin,
 )

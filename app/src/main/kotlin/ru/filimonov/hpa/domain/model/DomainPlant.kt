@@ -12,7 +12,6 @@ data class DomainPlant(
     val airHumidityMin: Float?,
     val airHumidityMax: Float?,
     val soilMoistureMin: Float?,
-    val soilMoistureMax: Float?,
     val lightLuxMax: Int?,
     val lightLuxMin: Int?,
 )

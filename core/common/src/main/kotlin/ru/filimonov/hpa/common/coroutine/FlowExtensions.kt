@@ -6,11 +6,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import java.util.Optional
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -31,12 +33,12 @@ object FlowExtensions {
         }
     }
 
-    fun <T1, T2> Flow<List<T1>>.mapList(transform: suspend T1.() -> T2): Flow<List<T2>> {
-        return map { list -> list.map { it.transform() } }
+    fun <T1, T2> Flow<List<T1>>.mapList(transform: suspend (T1) -> T2): Flow<List<T2>> {
+        return map { list -> list.map { transform(it) } }
     }
 
-    fun <T1, T2> Flow<Result<List<T1>>>.mapLatestResultList(transform: suspend T1.() -> T2): Flow<Result<List<T2>>> {
-        return mapLatestResult { list -> list.map { it.transform() } }
+    fun <T1, T2> Flow<Result<List<T1>>>.mapLatestResultList(transform: suspend (T1) -> T2): Flow<Result<List<T2>>> {
+        return mapLatestResult { list -> list.map { transform(it) } }
     }
 
     fun <T> Flow<Result<T?>>.requireNotNullResult(
@@ -53,22 +55,27 @@ object FlowExtensions {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T1, T2, R> combineResultsTransform(
+    fun <T1, T2, R> combineFlowResultsTransform(
         flow: Flow<Result<T1>>,
         flow2: Flow<Result<T2>>,
         transform: suspend (T1, T2) -> R
     ): Flow<Result<R>> {
-        return combineResults(flow, flow2).mapLatestResult { transform(it[0] as T1, it[1] as T2) }
+        return combineFlowResultsTransform(flow, flow2) { it ->
+            transform(
+                it[0] as T1,
+                it[1] as T2,
+            )
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T1, T2, T3, R> combineResultsTransform(
+    fun <T1, T2, T3, R> combineFlowResultsTransform(
         flow: Flow<Result<T1>>,
         flow2: Flow<Result<T2>>,
         flow3: Flow<Result<T3>>,
         transform: suspend (T1, T2, T3) -> R
     ): Flow<Result<R>> {
-        return combineResults(flow, flow2, flow3).mapLatestResult {
+        return combineFlowResultsTransform(flow, flow2, flow3) { it ->
             transform(
                 it[0] as T1,
                 it[1] as T2,
@@ -78,14 +85,14 @@ object FlowExtensions {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T1, T2, T3, T4, R> combineResultsTransform(
+    fun <T1, T2, T3, T4, R> combineFlowResultsTransform(
         flow: Flow<Result<T1>>,
         flow2: Flow<Result<T2>>,
         flow3: Flow<Result<T3>>,
         flow4: Flow<Result<T4>>,
         transform: suspend (T1, T2, T3, T4) -> R
     ): Flow<Result<R>> {
-        return combineResults(flow, flow2, flow3, flow4).mapLatestResult {
+        return combineFlowResultsTransform(flow, flow2, flow3, flow4) { it ->
             transform(
                 it[0] as T1,
                 it[1] as T2,
@@ -96,7 +103,7 @@ object FlowExtensions {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T1, T2, T3, T4, T5, R> combineResultsTransform(
+    fun <T1, T2, T3, T4, T5, R> combineFlowResultsTransform(
         flow: Flow<Result<T1>>,
         flow2: Flow<Result<T2>>,
         flow3: Flow<Result<T3>>,
@@ -104,7 +111,7 @@ object FlowExtensions {
         flow5: Flow<Result<T5>>,
         transform: suspend (T1, T2, T3, T4, T5) -> R
     ): Flow<Result<R>> {
-        return combineResults(flow, flow2, flow3, flow4, flow5).mapLatestResult {
+        return combineFlowResultsTransform(flow, flow2, flow3, flow4, flow5) { it ->
             transform(
                 it[0] as T1,
                 it[1] as T2,
@@ -141,7 +148,7 @@ object FlowExtensions {
         }
     }
 
-    fun <T> makeSyncFlow(
+    fun <T> makeSyncFlowCatching(
         syncDelay: Duration = DEFAULT_SYNC_DELAY,
         retryDelay: Duration = DEFAULT_RETRY_DELAY,
         emitter: suspend () -> T,
@@ -154,13 +161,52 @@ object FlowExtensions {
         }
     }
 
-    private fun combineResults(vararg flows: Flow<Result<*>>): Flow<Result<Array<*>>> {
-        return combine<Result<*>, Result<Array<*>>>(*flows) { flowArray: Array<Result<*>> ->
-            val firstFailure = flowArray.firstOrNull { it.isFailure }
-            if (firstFailure != null) {
-                Result.failure(firstFailure.exceptionOrNull()!!)
+    fun <T> makeSyncFlow(
+        syncDelay: Duration = DEFAULT_SYNC_DELAY,
+        emitter: suspend () -> T,
+    ): Flow<T> {
+        return flow {
+            while (true) {
+                emit(emitter())
+                delay(syncDelay)
+            }
+        }
+    }
+
+    fun <T> makeSyncFlowOpt(
+        syncDelay: Duration = DEFAULT_SYNC_DELAY,
+        emitter: suspend () -> Optional<T>,
+    ): Flow<T> {
+        return flow {
+            while (true) {
+                val res = emitter()
+                if (res.isPresent) {
+                    emit(res.get())
+                }
+                delay(syncDelay)
+            }
+        }
+    }
+
+    fun <T> Flow<Result<T>>.filterResult(predicate: suspend (T) -> Boolean): Flow<Result<T>> {
+        return filter {
+            if (it.isFailure)
+                true
+            else
+                predicate(it.getOrNull()!!)
+        }
+    }
+
+    private inline fun <reified T, R> combineFlowResultsTransform(
+        vararg flows: Flow<Result<T>>,
+        crossinline transform: suspend (Array<T>) -> R
+    ): Flow<Result<R>> {
+        return combine(*flows) { results: Array<Result<T>> ->
+            val failureResult = results.firstOrNull { it.isFailure }
+            return@combine if (failureResult != null) {
+                Result.failure(failureResult.exceptionOrNull()!!)
             } else {
-                Result.success(flowArray.map { it.getOrThrow()!! }.toTypedArray())
+                Result.success(transform(results.map { it.getOrNull() as T }.toTypedArray()))
             }
         }
     }

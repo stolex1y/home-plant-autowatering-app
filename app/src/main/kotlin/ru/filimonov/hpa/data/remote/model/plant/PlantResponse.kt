@@ -13,7 +13,6 @@ data class PlantResponse(
     val airHumidityMin: Float?,
     val airHumidityMax: Float?,
     val soilMoistureMin: Float?,
-    val soilMoistureMax: Float?,
     val lightLuxMax: Int?,
     val lightLuxMin: Int?,
 ) {
@@ -26,7 +25,6 @@ data class PlantResponse(
         airHumidityMin = airHumidityMin,
         airHumidityMax = airHumidityMax,
         soilMoistureMin = soilMoistureMin,
-        soilMoistureMax = soilMoistureMax,
         lightLuxMax = lightLuxMax,
         lightLuxMin = lightLuxMin,
     )

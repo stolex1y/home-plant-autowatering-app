@@ -34,8 +34,8 @@ androidx-window = "1.2.0"
 androidx-work = "2.9.0"
 androidx-hilt-navigation-compose = "1.2.0"
 androix-test-uiautomator = "2.3.0"
-coil = "2.5.0"
-coroutines = "1.7.3"
+coil = "2.6.0"
+coroutines = "1.8.0"
 google-maps = "18.2.0"
 gradle-versions = "0.47.0"
 hilt = "2.51"
@@ -74,6 +74,7 @@ firebase-ui-auth = "7.2.0"
 datastore-preferences = "1.0.0"
 datastore-proto = "1.0.0"
 google-play-auth = "21.0.0"
+zelory-compressor = "3.0.1"
 
 [libraries]
 
@@ -159,7 +160,7 @@ androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref
 androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "androidx-work" }
 
 androidx-window = { module = "androidx.window:window", version.ref = "androidx-window" }
-coil-kt-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+coil-kt-compose = { module = "io.coil-kt:coil-compose-base", version.ref = "coil" }
 core-jdk-desugaring = { module = "com.android.tools:desugar_jdk_libs", version.ref = "jdk-desugar" }
 google-android-material = { module = "com.google.android.material:material", version.ref = "material" }
 googlemaps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps-compose" }
@@ -193,6 +194,7 @@ firebase-ui-auth = { group = "com.firebaseui", name = "firebase-ui-auth", versio
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore-preferences" }
 androidx-datastore-proto = { group = "androidx.datastore", name = "datastore", version.ref = "datastore-proto" }
 google-play-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "google-play-auth" }
+zelory-compressor = { group = "id.zelory", name = "compressor", version.ref = "zelory-compressor" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

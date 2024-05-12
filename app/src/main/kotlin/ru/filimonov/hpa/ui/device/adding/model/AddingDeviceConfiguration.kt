@@ -26,13 +26,6 @@ class AddingDeviceConfiguration(
         )
     )
 
-    fun toDomain(deviceId: UUID, serverUrl: URL) = DomainDeviceConfiguration(
-        ssid = ssid.value,
-        pass = pass.value,
-        deviceId = deviceId,
-        serverUrl = serverUrl,
-    )
-
     companion object {
         fun saver() = mapSaver(
             save = { entity ->

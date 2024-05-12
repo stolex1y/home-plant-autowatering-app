@@ -2,10 +2,13 @@ package ru.filimonov.hpa.common.utils.time
 
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.Calendar
 import java.util.Locale
 
@@ -13,6 +16,12 @@ object DateUtils {
     const val DMY_DATE = "dd.MM.yyyy"
     const val DMY_DATETIME = "dd.MM.yyyy HH:mm"
     const val HM_TIME = "HH:mm"
+
+    private val shortDateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+    private val mediumDateTimeFormatter =
+        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+    private val longDateTimeFormatter =
+        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.MEDIUM)
 
     @JvmStatic
     fun Long.toCalendar(): Calendar =
@@ -25,59 +34,76 @@ object DateUtils {
     fun ZonedDateTime.isPast(): Boolean = !isNotPast()
 
     @JvmStatic
-    fun ZonedDateTime?.toString(pattern: String): String {
-        return if (this == null)
-            ""
-        else
-            DateTimeFormatter.ofPattern(pattern).withLocale(Locale.getDefault())
-                .format(this)
+    fun ZonedDateTime.toString(pattern: String): String {
+        return DateTimeFormatter.ofPattern(pattern).withLocale(Locale.getDefault())
+            .format(this)
     }
 
     @JvmStatic
-    fun LocalDate?.toString(pattern: String): String {
-        return if (this == null)
-            ""
-        else
-            DateTimeFormatter.ofPattern(pattern).withLocale(Locale.getDefault())
-                .format(this)
+    fun ZonedDateTime.toShortFormatString(
+        zonedId: ZoneId = ZoneId.systemDefault(),
+        locale: Locale = Locale.getDefault()
+    ): String =
+        shortDateTimeFormatter
+            .withZone(zonedId)
+            .withLocale(locale)
+            .format(this)
+
+    @JvmStatic
+    fun ZonedDateTime.toMediumFormatString(
+        zonedId: ZoneId = ZoneId.systemDefault(),
+        locale: String = Locale.getDefault().toString()
+    ): String =
+        mediumDateTimeFormatter
+            .withZone(zonedId)
+            .withLocale(Locale.forLanguageTag(locale))
+            .format(this)
+
+    @JvmStatic
+    fun ZonedDateTime.toLongFormatString(
+        zonedId: ZoneId = ZoneId.systemDefault(),
+        locale: Locale = Locale.getDefault()
+    ): String =
+        longDateTimeFormatter
+            .withZone(zonedId)
+            .withLocale(locale)
+            .format(this)
+
+    @JvmStatic
+    fun LocalDate.toString(pattern: String): String {
+        return DateTimeFormatter.ofPattern(pattern).withLocale(Locale.getDefault())
+            .format(this)
     }
 
     @JvmStatic
-    fun LocalTime?.toString(pattern: String): String {
-        return if (this == null)
-            ""
-        else
-            DateTimeFormatter.ofPattern(pattern).withLocale(Locale.getDefault())
-                .format(this)
+    fun LocalTime.toString(pattern: String): String {
+        return DateTimeFormatter.ofPattern(pattern).withLocale(Locale.getDefault())
+            .format(this)
     }
 
     @JvmStatic
-    fun Long.toZonedDateTime(zoneId: ZoneId = ZoneId.systemDefault()) =
+    fun Long.toZonedDateTime(zoneId: ZoneId = ZoneId.systemDefault()): ZonedDateTime =
         ZonedDateTime.ofInstant(Instant.ofEpochMilli(this), zoneId)
 
     @JvmStatic
-    fun Long.toZonedDateTime(otherDate: ZonedDateTime) =
+    fun Long.toZonedDateTime(otherDate: ZonedDateTime): ZonedDateTime =
         ZonedDateTime.ofInstant(Instant.ofEpochMilli(this), otherDate.zone)
 
     @JvmStatic
     fun ZonedDateTime.toEpochMillis() = this.toInstant().toEpochMilli()
 
     @JvmStatic
-    fun nowZonedDateTime(otherDate: ZonedDateTime) = ZonedDateTime.now(otherDate.zone)
+    fun now(otherDate: ZonedDateTime): ZonedDateTime = ZonedDateTime.now(otherDate.zone)
 
     @JvmStatic
-    fun Pair<Long, ZoneId>.toZonedDateTime() =
+    fun Pair<Long, ZoneId>.toZonedDateTime(): ZonedDateTime =
         ZonedDateTime.ofInstant(Instant.ofEpochMilli(first), second)
 
     @JvmStatic
-    fun maxZonedDateTime(): ZonedDateTime {
-        return ZonedDateTime.of(999999999, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault())
-    }
+    fun maxZonedDateTime() = ZonedDateTime.of(LocalDateTime.MAX, ZoneOffset.systemDefault())
 
     @JvmStatic
-    fun minZonedDateTime(): ZonedDateTime {
-        return ZonedDateTime.ofInstant(Instant.MIN, ZoneId.systemDefault())
-    }
+    fun minZonedDateTime() = ZonedDateTime.of(LocalDateTime.MIN, ZoneOffset.systemDefault())
 
     @JvmStatic
     fun todayLastMoment(zone: ZoneId = ZoneId.systemDefault()): ZonedDateTime =

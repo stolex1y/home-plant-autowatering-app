@@ -1,5 +1,6 @@
 package ru.filimonov.hpa.widgets
 
+import android.annotation.SuppressLint
 import androidx.annotation.StringRes
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -45,6 +46,7 @@ class SnackbarState(
         }
     }
 
+    @SuppressLint("ComposableNaming")
     @Composable
     fun showSnackbar(
         @StringRes messageRes: Int,
@@ -72,6 +74,7 @@ class SnackbarState(
         showingSnackbarJob = null
     }
 
+    @SuppressLint("ComposableNaming")
     @Composable
     fun replaceSnackbar(
         @StringRes messageRes: Int,

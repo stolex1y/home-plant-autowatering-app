@@ -37,7 +37,7 @@ fun SignInScreen(
         viewModel.init()
     }
 
-    val state: AuthViewModel.State by viewModel.state.collectAsStateWithLifecycle()
+    val state: AuthViewModel.UiState by viewModel.state.collectAsStateWithLifecycle()
     val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestProfile()
         .requestEmail()
@@ -58,21 +58,21 @@ fun SignInScreen(
         snackbarHost = { HpaSnackbarHost(snackbarState) }
     ) {
         when (val stateValue = state) {
-            AuthViewModel.State.Expired, AuthViewModel.State.SignedOut -> {
+            AuthViewModel.UiState.Expired, AuthViewModel.UiState.SignedOut -> {
                 LaunchedEffect(signInLauncher) {
                     signInLauncher.launch(signInOptions)
                 }
                 viewModel.onStartSigningIn()
             }
 
-            AuthViewModel.State.SigningIn -> Loading()
-            is AuthViewModel.State.SignedIn -> {
+            AuthViewModel.UiState.SigningIn -> Loading()
+            is AuthViewModel.UiState.SignedIn -> {
                 SignedIn(name = stateValue.userAccount.name)
             }
 
-            AuthViewModel.State.Loading -> {}
+            AuthViewModel.UiState.Loading -> {}
 
-            is AuthViewModel.State.Error -> {
+            is AuthViewModel.UiState.Error -> {
                 snackbarState.showSnackbar(
                     messageRes = stateValue.msg,
                     onDismiss = { onSignInFailure() })

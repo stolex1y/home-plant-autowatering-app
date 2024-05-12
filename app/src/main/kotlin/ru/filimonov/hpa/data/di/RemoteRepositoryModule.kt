@@ -1,4 +1,4 @@
-package ru.filimonov.hpa.data.remote.di
+package ru.filimonov.hpa.data.di
 
 import com.google.gson.Gson
 import dagger.Module
@@ -16,11 +16,12 @@ import okhttp3.Route
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import ru.filimonov.hpa.BuildConfig
-import ru.filimonov.hpa.data.remote.isClientError
 import ru.filimonov.hpa.data.remote.repository.AuthRemoteRepository
 import ru.filimonov.hpa.data.remote.repository.DeviceConfigurationRemoteRepository
 import ru.filimonov.hpa.data.remote.repository.DeviceRemoteRepository
 import ru.filimonov.hpa.data.remote.repository.PlantRemoteRepository
+import ru.filimonov.hpa.data.remote.repository.readings.SensorReadingsRemoteRepository
+import ru.filimonov.hpa.data.remote.repository.readings.SoilMoistureReadingsRemoteRepository
 import ru.filimonov.hpa.domain.service.auth.UserAuthService
 import timber.log.Timber
 import javax.inject.Named
@@ -66,19 +67,29 @@ internal interface RemoteRepositoryModule {
         }
 
         @Provides
+        @Singleton
+        fun sensorReadingsRepository(
+            retrofit: Retrofit
+        ): SensorReadingsRemoteRepository {
+            return retrofit.create(SensorReadingsRemoteRepository::class.java)
+        }
+
+        @Provides
+        @Singleton
+        fun soilMoistureReadingsRepository(
+            retrofit: Retrofit
+        ): SoilMoistureReadingsRemoteRepository {
+            return retrofit.create(SoilMoistureReadingsRemoteRepository::class.java)
+        }
+
+        @Provides
         @IntoSet
         @Singleton
         @JvmSuppressWildcards
         fun logInterceptor(): Interceptor {
             return Interceptor { chain ->
                 Timber.d("make request to ${chain.request().url}")
-                val response = chain.proceed(chain.request())
-                val networkResponse = response.networkResponse
-                val responseBody = networkResponse?.body
-                if (responseBody != null && networkResponse.isClientError()) {
-                    Timber.e("rcv failure repsonse: ${responseBody.string()}")
-                }
-                response
+                chain.proceed(chain.request())
             }
         }
 
@@ -91,10 +102,14 @@ internal interface RemoteRepositoryModule {
         ): Interceptor {
             return Interceptor { chain ->
                 runBlocking {
+                    val srcRequest = chain.request()
+                    if (srcRequest.url.pathSegments.firstOrNull() == "reauth") {
+                        return@runBlocking chain.proceed(srcRequest)
+                    }
+
                     val idToken = userAuthService.get().getIdToken().first()
-                    val requestBuilder = chain.request()
-                        .newBuilder()
-                        .url(chain.request().url)
+                    val requestBuilder = srcRequest.newBuilder()
+                        .url(srcRequest.url)
 
                     if (idToken != null) {
                         requestBuilder.addHeader(BuildConfig.API_AUTH_HEADER, "Bearer $idToken")
@@ -113,12 +128,9 @@ internal interface RemoteRepositoryModule {
         ): Authenticator {
             return Authenticator { route: Route?, response: Response ->
                 runBlocking {
-                    var idToken = userAuthService.get().getIdToken().first()
-                    if (idToken == null) {
-                        userAuthService.get().reauthenticate()
-                        idToken =
-                            userAuthService.get().getIdToken().first() ?: return@runBlocking null
-                    }
+                    userAuthService.get().reauthenticate()
+                    val idToken =
+                        userAuthService.get().getIdToken().first() ?: return@runBlocking null
                     response.request.newBuilder()
                         .addHeader(BuildConfig.API_AUTH_HEADER, "Bearer $idToken")
                         .build()

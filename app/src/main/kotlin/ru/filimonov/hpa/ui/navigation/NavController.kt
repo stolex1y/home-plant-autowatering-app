@@ -22,13 +22,15 @@ class HpaNavController(
     private val currentRoute: String?
         get() = navController.currentDestination?.route
 
-    fun navigateToRoute(route: String) {
+    fun navigateToRoute(route: String, popUpToStart: Boolean = false) {
         if (route != currentRoute) {
             navController.navigate(route) {
                 launchSingleTop = true
                 restoreState = true
-                popUpTo(navController.graph.startDestinationId) {
-                    saveState = true
+                if (popUpToStart) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        saveState = true
+                    }
                 }
             }
         }

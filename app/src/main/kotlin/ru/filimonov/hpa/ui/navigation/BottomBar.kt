@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import ru.filimonov.hpa.R
 import ru.filimonov.hpa.ui.common.navigation.Destination
 import ru.filimonov.hpa.ui.devices.DevicesScreenDestination
+import ru.filimonov.hpa.ui.plants.PlantsScreenDestination
 import ru.filimonov.hpa.ui.theme.HpaTheme
 
 @Composable
@@ -51,6 +50,7 @@ fun HpaBottomBar(
 
 val MAIN_DESTINATIONS: Array<out BottomBarDestination> = arrayOf(
     DevicesScreenDestination,
+    PlantsScreenDestination,
 )
 
 interface BottomBarDestination : Destination {
@@ -80,7 +80,8 @@ private fun BottomBarPreview() {
                 HpaBottomBar(
                     tabs = destinations,
                     currentTab = DevicesScreenDestination,
-                    onNavigateToDestination = {})
+                    onNavigateToDestination = {}
+                )
             }
         ) { innerPadding ->
             Text(

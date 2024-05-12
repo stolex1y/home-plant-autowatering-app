@@ -8,6 +8,7 @@ import java.util.UUID
 
 interface DeviceService {
     fun getAll(): Flow<Result<List<DomainDevice>>>
+    fun get(deviceId: UUID): Flow<Result<DomainDevice>>
     suspend fun add(device: DomainDevice): Result<DomainDevice>
     suspend fun delete(uuid: UUID): Result<Unit>
     suspend fun update(device: DomainDevice): Result<Unit>
